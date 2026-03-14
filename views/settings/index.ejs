@@ -1,0 +1,124 @@
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-cog text-success me-2"></i>Settings
+            </h1>
+            <p class="text-muted">Configure application settings and integrations</p>
+        </div>
+    </div>
+
+    <!-- Settings Cards -->
+    <div class="row g-4">
+        <!-- Authentication Settings -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 hover-shadow">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="settings-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                            <i class="fas fa-shield-alt fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">Authentication</h5>
+                            <small class="text-muted">OAuth & Login Settings</small>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted">
+                        Configure Google OAuth, social login options, and authentication methods.
+                    </p>
+                    <a href="/settings/authentication" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-cog me-1"></i>Configure
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- WhatsApp OTP Settings -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 hover-shadow">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="settings-icon bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
+                            <i class="fab fa-whatsapp fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">WhatsApp OTP</h5>
+                            <small class="text-muted">Phone Verification</small>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted">
+                        Configure WhatsApp Business API for OTP verification and phone number validation.
+                    </p>
+                    <a href="/settings/whatsapp-otp" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-cog me-1"></i>Configure
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- More settings cards can be added here -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 hover-shadow opacity-50">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="settings-icon bg-secondary bg-opacity-10 text-secondary rounded-circle p-3 me-3">
+                            <i class="fas fa-envelope fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">Email Settings</h5>
+                            <small class="text-muted">Coming Soon</small>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted">
+                        Configure SMTP settings for email notifications and alerts.
+                    </p>
+                    <button class="btn btn-outline-secondary btn-sm" disabled>
+                        <i class="fas fa-lock me-1"></i>Coming Soon
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 hover-shadow">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="settings-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                            <i class="fas fa-bell fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">Notifications</h5>
+                            <small class="text-muted">Telegram Alerts</small>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted">
+                        Manage notification preferences and alert settings.
+                    </p>
+                    <a href="/settings/notifications" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-cog me-1"></i>Configure
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+
+    .hover-shadow:hover:not(.opacity-50) {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .settings-icon {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>

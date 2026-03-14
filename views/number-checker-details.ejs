@@ -1,0 +1,602 @@
+<% currentPage='number-checker' %>
+
+    <!-- Page Header -->
+    <div class="number-checker-page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="mb-2">
+                    <a href="/number-checker" class="text-decoration-none text-muted">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Checkers
+                    </a>
+                </div>
+                <h2 class="mb-1 fw-bold">
+                    <i class="fab fa-whatsapp me-2"></i>
+                    <%= checker.name %>
+                </h2>
+                <p class="text-muted mb-0">Number verification progress and results</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="d-flex gap-2 flex-wrap justify-content-md-end align-items-center">
+                    <% if (checker.status==='pending' ) { %>
+                        <button class="btn btn-success px-4 py-2 shadow-sm fw-semibold" data-action="start"
+                            data-checker-id="<%= checker.id %>" style="min-width: 120px;">
+                            <i class="fas fa-play me-2"></i>Start Checking
+                        </button>
+                    <% } else if (checker.status==='running' ) { %>
+                        <button class="btn btn-warning text-white px-4 py-2 shadow-sm fw-semibold" data-action="pause"
+                            data-checker-id="<%= checker.id %>" style="min-width: 110px;">
+                            <i class="fas fa-pause me-2"></i>Pause
+                        </button>
+                        <button class="btn btn-danger px-4 py-2 shadow-sm fw-semibold" data-action="stop" 
+                            data-checker-id="<%= checker.id %>" style="min-width: 110px;">
+                            <i class="fas fa-stop me-2"></i>Stop
+                        </button>
+                    <% } else if (checker.status==='paused' ) { %>
+                        <button class="btn btn-success px-4 py-2 shadow-sm fw-semibold" data-action="resume"
+                            data-checker-id="<%= checker.id %>" style="min-width: 120px;">
+                            <i class="fas fa-play me-2"></i>Resume
+                        </button>
+                        <button class="btn btn-danger px-4 py-2 shadow-sm fw-semibold" data-action="stop" 
+                            data-checker-id="<%= checker.id %>" style="min-width: 110px;">
+                            <i class="fas fa-stop me-2"></i>Stop
+                        </button>
+                    <% } %>
+                </div>
+                <% if (checker.invalid_contacts && checker.invalid_contacts > 0 && (checker.status === 'completed' || checker.status === 'failed')) { %>
+                <div class="mt-3">
+                    <button class="btn btn-danger w-100 py-3 fw-semibold shadow position-relative overflow-hidden" data-action="delete-invalid"
+                        data-checker-id="<%= checker.id %>" style="border-radius: 10px; font-size: 15px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border: none;">
+                        <i class="fas fa-trash-alt me-2"></i>Delete <%= checker.invalid_contacts %> Invalid Contact<%= checker.invalid_contacts > 1 ? 's' : '' %>
+                    </button>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Total Numbers</div>
+                            <div class="stats-value fw-bold text-primary">
+                                <%= checker.total_contacts %>
+                            </div>
+                        </div>
+                        <div class="stats-icon-bg bg-primary-subtle text-primary rounded-3 p-2">
+                            <i class="fas fa-hashtag fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Scanned</div>
+                            <div class="stats-value fw-bold text-info">
+                                <%= checker.checked_contacts %>
+                            </div>
+                        </div>
+                        <div class="stats-icon-bg bg-info-subtle text-info rounded-3 p-2">
+                            <i class="fas fa-search fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Valid Numbers</div>
+                            <div class="stats-value fw-bold text-success">
+                                <%= checker.valid_contacts %>
+                            </div>
+                        </div>
+                        <div class="stats-icon-bg bg-success-subtle text-success rounded-3 p-2">
+                            <i class="fas fa-check-circle fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Invalid Numbers</div>
+                            <div class="stats-value fw-bold text-danger">
+                                <%= checker.invalid_contacts %>
+                            </div>
+                        </div>
+                        <div class="stats-icon-bg bg-danger-subtle text-danger rounded-3 p-2">
+                            <i class="fas fa-times-circle fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <% const progress=checker.total_contacts> 0 ? (checker.checked_contacts / checker.total_contacts * 100) :
+                0;
+                const validWidth = checker.total_contacts > 0 ? (checker.valid_contacts / checker.total_contacts * 100)
+                : 0;
+                const invalidWidth = checker.total_contacts > 0 ? (checker.invalid_contacts / checker.total_contacts *
+                100) : 0;
+                %>
+            
+            <!-- Progress Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <div>
+                    <h5 class="mb-1">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>Verification Progress
+                    </h5>
+                    <small class="text-muted">
+                        <%= checker.checked_contacts %> of <%= checker.total_contacts %> numbers checked
+                    </small>
+                </div>
+                <div class="text-end">
+                    <% if (progress === 100) { %>
+                        <div class="progress-percentage completed">
+                            <%= progress.toFixed(0) %><span>%</span>
+                        </div>
+                    <% } else { %>
+                        <div class="progress-percentage in-progress">
+                            <%= progress.toFixed(0) %><span>%</span>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Main Progress Bar -->
+            <div class="progress-bar-container mb-4">
+                <div class="progress">
+                    <div class="progress-bar bg-success" data-width="<%= validWidth.toFixed(1) %>"
+                        title="<%= checker.valid_contacts %> valid numbers">
+                    </div>
+                    <div class="progress-bar bg-danger" data-width="<%= invalidWidth.toFixed(1) %>"
+                        title="<%= checker.invalid_contacts %> invalid numbers"></div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="stat-box stat-success">
+                        <div class="stat-box-label">
+                            <i class="fas fa-check-circle text-success me-1"></i>Valid
+                        </div>
+                        <div class="stat-box-value">
+                            <%= checker.valid_contacts %>
+                        </div>
+                        <small class="text-muted">
+                            <%= checker.total_contacts > 0 ? ((checker.valid_contacts / checker.total_contacts) * 100).toFixed(1) : 0 %>%
+                        </small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-box stat-danger">
+                        <div class="stat-box-label">
+                            <i class="fas fa-times-circle text-danger me-1"></i>Invalid
+                        </div>
+                        <div class="stat-box-value">
+                            <%= checker.invalid_contacts %>
+                        </div>
+                        <small class="text-muted">
+                            <%= checker.total_contacts > 0 ? ((checker.invalid_contacts / checker.total_contacts) * 100).toFixed(1) : 0 %>%
+                        </small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-box stat-info">
+                        <div class="stat-box-label">
+                            <i class="fas fa-hourglass-half text-info me-1"></i>Pending
+                        </div>
+                        <div class="stat-box-value">
+                            <%= checker.total_contacts - checker.checked_contacts %>
+                        </div>
+                        <small class="text-muted">
+                            <%= checker.total_contacts > 0 ? (((checker.total_contacts - checker.checked_contacts) / checker.total_contacts) * 100).toFixed(1) : 0 %>%
+                        </small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-box stat-purple">
+                        <div class="stat-box-label">
+                            <i class="fas fa-list text-purple me-1"></i>Total
+                        </div>
+                        <div class="stat-box-value">
+                            <%= checker.total_contacts %>
+                        </div>
+                        <small class="text-muted">contacts</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock text-primary me-2"></i>
+                        <small class="text-muted">
+                            <strong>Interval:</strong>
+                            <% const interval = checker.check_interval || 300; %>
+                            <%= interval >= 1000 ? (interval / 1000) + 's' : interval + 'ms' %>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar text-primary me-2"></i>
+                        <small class="text-muted">
+                            <strong>Created:</strong>
+                            <%= new Date(checker.created_at).toLocaleDateString() %>
+                        </small>
+                    </div>
+                </div>
+                <% if (checker.started_at) { %>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-play text-success me-2"></i>
+                            <small class="text-muted">
+                                <strong>Started:</strong>
+                                <%= new Date(checker.started_at).toLocaleDateString() %>
+                            </small>
+                        </div>
+                    </div>
+                    <% } %>
+                        <% if (checker.completed_at) { %>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <small class="text-muted">
+                                        <strong>Completed:</strong>
+                                        <%= new Date(checker.completed_at).toLocaleDateString() %>
+                                    </small>
+                                </div>
+                            </div>
+                            <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check Results -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white border-bottom py-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-list-check me-2 text-primary"></i>Check Results
+                </h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-primary filter-btn active" onclick="filterLogs('all')"
+                        data-filter="all">
+                        All (<%= logs.length %>)
+                    </button>
+                    <button class="btn btn-sm btn-outline-success filter-btn" onclick="filterLogs('valid')"
+                        data-filter="valid">
+                        <i class="fas fa-check-circle me-1"></i>Valid (<%= logs.filter(l=> l.status === 'valid').length
+                            %>)
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger filter-btn" onclick="filterLogs('invalid')"
+                        data-filter="invalid">
+                        <i class="fas fa-times-circle me-1"></i>Invalid (<%= logs.filter(l=> l.status ===
+                            'invalid').length %>)
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterLogs('pending')"
+                        data-filter="pending">
+                        <i class="fas fa-clock me-1"></i>Pending (<%= logs.filter(l=> l.status === 'pending').length %>)
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <% if (logs.length===0) { %>
+                <div class="empty-state-modern p-5 text-center">
+                    <div class="empty-icon-modern mx-auto mb-3">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h4 class="mb-2">No results yet</h4>
+                    <p class="text-muted mb-3">Start the checker to begin verifying numbers</p>
+                    <% if (checker.status==='pending' ) { %>
+                        <button class="btn btn-success" data-action="start" data-checker-id="<%= checker.id %>">
+                            <i class="fas fa-play me-2"></i>Start Checker
+                        </button>
+                        <% } %>
+                </div>
+                <% } else { %>
+                    <!-- Desktop Table View -->
+                    <div class="table-responsive d-none d-md-block">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Contact</th>
+                                    <th>Phone Number</th>
+                                    <th>Status</th>
+                                    <th>WhatsApp JID</th>
+                                    <th>Checked At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody">
+                                <% logs.forEach(log=> { %>
+                                    <tr data-status="<%= log.status %>">
+                                        <td>
+                                            <%= log.contact_name || log.phone_number %>
+                                        </td>
+                                        <td><code><%= log.phone_number %></code></td>
+                                        <td>
+                                            <% if (log.status==='valid' ) { %>
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check-circle me-1"></i>Valid
+                                                </span>
+                                                <% } else if (log.status==='invalid' ) { %>
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-times-circle me-1"></i>Invalid
+                                                    </span>
+                                                    <% } else if (log.status==='error' ) { %>
+                                                        <span class="badge bg-warning">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>Error
+                                                        </span>
+                                                        <% } else { %>
+                                                            <span class="badge bg-secondary">
+                                                                <i class="fas fa-clock me-1"></i>Pending
+                                                            </span>
+                                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (log.jid) { %>
+                                                <small class="text-muted">
+                                                    <%= log.jid %>
+                                                </small>
+                                                <% } else { %>
+                                                    <small class="text-muted">-</small>
+                                                    <% } %>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                <%= new Date(log.checked_at).toLocaleString() %>
+                                            </small>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Card View -->
+                    <div class="d-md-none p-3">
+                        <% logs.forEach(log=> { %>
+                            <div class="card mb-3" data-status="<%= log.status %>">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <div class="fw-bold">
+                                                <%= log.contact_name || log.phone_number %>
+                                            </div>
+                                            <small class="text-muted"><code><%= log.phone_number %></code></small>
+                                        </div>
+                                        <% if (log.status==='valid' ) { %>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle"></i>
+                                            </span>
+                                            <% } else if (log.status==='invalid' ) { %>
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times-circle"></i>
+                                                </span>
+                                                <% } else if (log.status==='error' ) { %>
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                    </span>
+                                                    <% } else { %>
+                                                        <span class="badge bg-secondary">
+                                                            <i class="fas fa-clock"></i>
+                                                        </span>
+                                                        <% } %>
+                                    </div>
+                                    <% if (log.jid) { %>
+                                        <div class="mb-1">
+                                            <small class="text-muted">JID: <%= log.jid %></small>
+                                        </div>
+                                        <% } %>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                <%= new Date(log.checked_at).toLocaleString() %>
+                                            </small>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } %>
+        </div>
+    </div>
+
+    <script>
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        // Apply progress bar widths
+        document.querySelectorAll('.progress-bar[data-width]').forEach(bar => {
+            bar.style.width = bar.getAttribute('data-width') + '%';
+        });
+
+        // Event delegation for action buttons
+        document.addEventListener('click', async (e) => {
+            const button = e.target.closest('[data-action]');
+            if (!button) return;
+
+            const action = button.dataset.action;
+            const id = button.dataset.checkerId;
+
+            switch (action) {
+                case 'start':
+                    await startChecker(id);
+                    break;
+                case 'pause':
+                    await pauseChecker(id);
+                    break;
+                case 'resume':
+                    await resumeChecker(id);
+                    break;
+                case 'stop':
+                    await stopChecker(id);
+                    break;
+                case 'delete-invalid':
+                    await deleteInvalidContacts(id);
+                    break;
+            }
+        });
+
+        function filterLogs(status) {
+            const rows = document.querySelectorAll('[data-status]');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+
+            // Update button states
+            filterBtns.forEach(btn => {
+                if (btn.dataset.filter === status) {
+                    btn.classList.remove('btn-outline-success', 'btn-outline-danger', 'btn-outline-secondary');
+                    btn.classList.add('btn-primary', 'active');
+                } else {
+                    btn.classList.remove('btn-primary', 'active');
+                    const filterType = btn.dataset.filter;
+                    if (filterType === 'valid') btn.classList.add('btn-outline-success');
+                    else if (filterType === 'invalid') btn.classList.add('btn-outline-danger');
+                    else if (filterType === 'pending') btn.classList.add('btn-outline-secondary');
+                }
+            });
+
+            // Filter rows
+            rows.forEach(row => {
+                if (status === 'all' || row.dataset.status === status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        async function startChecker(id) {
+            try {
+                const response = await fetch(`/webapi/number-checkers/${id}/start`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-Token': csrfToken }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    window.showToast('Number checker started', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    window.showToast(result.message || 'Failed to start checker', 'danger');
+                }
+            } catch (error) {
+                window.showToast('Failed to start checker', 'danger');
+            }
+        }
+
+        async function pauseChecker(id) {
+            try {
+                const response = await fetch(`/webapi/number-checkers/${id}/pause`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-Token': csrfToken }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    window.showToast('Number checker paused', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    window.showToast(result.message || 'Failed to pause checker', 'danger');
+                }
+            } catch (error) {
+                window.showToast('Failed to pause checker', 'danger');
+            }
+        }
+
+        async function resumeChecker(id) {
+            try {
+                const response = await fetch(`/webapi/number-checkers/${id}/resume`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-Token': csrfToken }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    window.showToast('Number checker resumed', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    window.showToast(result.message || 'Failed to resume checker', 'danger');
+                }
+            } catch (error) {
+                window.showToast('Failed to resume checker', 'danger');
+            }
+        }
+
+        async function stopChecker(id) {
+            ConfirmModal.show({
+                title: 'Stop Checker?',
+                message: 'Are you sure you want to stop this checker? This action cannot be undone.',
+                confirmText: 'Stop',
+                type: 'danger',
+                icon: 'fa-stop',
+                confirmIcon: 'fa-stop',
+                onConfirm: async () => {
+                    try {
+                        const response = await fetch(`/webapi/number-checkers/${id}/stop`, {
+                            method: 'POST',
+                            headers: { 'X-CSRF-Token': csrfToken }
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            window.showToast('Number checker stopped', 'success');
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            window.showToast(result.message || 'Failed to stop checker', 'danger');
+                        }
+                    } catch (error) {
+                        window.showToast('Failed to stop checker', 'danger');
+                    }
+                }
+            });
+        }
+
+        async function deleteInvalidContacts(id) {
+            ConfirmModal.show({
+                title: 'Delete Invalid Contacts?',
+                message: 'Are you sure you want to delete all invalid contacts? This action cannot be undone.',
+                confirmText: 'Delete',
+                type: 'danger',
+                icon: 'fa-trash',
+                confirmIcon: 'fa-trash',
+                onConfirm: async () => {
+                    try {
+                        const response = await fetch(`/webapi/number-checkers/${id}/delete-invalid`, {
+                            method: 'POST',
+                            headers: { 'X-CSRF-Token': csrfToken }
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            window.showToast(result.message, 'success');
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            window.showToast(result.message || 'Failed to delete contacts', 'danger');
+                        }
+                    } catch (error) {
+                        window.showToast('Failed to delete contacts', 'danger');
+                    }
+                }
+            });
+        }
+    </script>
+
+    <% if (checker.status==='running' ) { %>
+        <script>
+            // Auto-refresh every 5 seconds when checker is running
+            setInterval(() => window.location.reload(), 5000);
+        </script>
+        <% } %>

@@ -1,0 +1,730 @@
+<% currentPage='contacts' %>
+
+    <!-- Page Header - Modern Dashboard Style -->
+    <div class="contacts-page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2 class="mb-1 fw-bold"><i class="fas fa-address-book me-2"></i>Contacts</h2>
+                <p class="text-muted mb-0">Manage your contact list and groups</p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+                    <button class="btn btn-success btn-lg shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal"
+                        data-bs-target="#addContactModal">
+                        <i class="fas fa-plus me-2"></i>Add Contact
+                    </button>
+                    <button class="btn btn-success btn-lg shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal"
+                        data-bs-target="#importModal">
+                        <i class="fas fa-upload me-2"></i>Import
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contacts Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Total Contacts</div>
+                            <div class="stats-value fw-bold text-primary">
+                                <%= stats.total %>
+                            </div>
+                        </div>
+                        <div class="stats-icon-bg bg-primary-subtle text-primary rounded-3 p-2">
+                            <i class="fas fa-users fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Favorites</div>
+                            <div class="stats-value fw-bold text-warning">
+                                <%= stats.favorites %>
+                            </div>
+                        </div>
+                        <div class="stats-icon-bg bg-warning-subtle text-warning rounded-3 p-2">
+                            <i class="fas fa-star fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Groups</div>
+                            <div class="stats-value fw-bold text-success">
+                                <%= groups.length %>
+                            </div>
+                        </div>
+                        <div class="stats-icon-bg bg-success-subtle text-success rounded-3 p-2">
+                            <i class="fas fa-layer-group fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Quick Actions</div>
+                            <div class="stats-value fw-bold text-info"><i class="fas fa-bolt"></i></div>
+                        </div>
+                        <div class="stats-icon-bg bg-info-subtle text-info rounded-3 p-2">
+                            <i class="fas fa-magic fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="row g-4">
+        <!-- Mobile Groups Toggle -->
+        <div class="col-12 d-lg-none">
+            <button class="mobile-groups-toggle" id="mobileGroupsToggle" type="button">
+                <div class="toggle-content">
+                    <div class="toggle-left">
+                        <div class="toggle-icon">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <span class="toggle-text">Groups</span>
+                        <span class="toggle-badge"><%= groups.length + 2 %></span>
+                    </div>
+                    <i class="fas fa-chevron-down toggle-arrow"></i>
+                </div>
+            </button>
+        </div>
+
+        <!-- Sidebar - Groups -->
+        <div class="col-lg-3 col-md-4 contacts-sidebar-desktop" id="groupsSidebar">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-layer-group me-2 text-success"></i>Groups</h5>
+                        <button class="btn btn-sm btn-success" id="btnShowCreateGroup">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="groups-list-modern">
+                        <div class="group-item-modern <%= !filters.group_id ? 'active' : '' %>" data-group-id="">
+                            <div class="group-icon-modern"
+                                style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="group-info-modern">
+                                <div class="group-name-modern">All Contacts</div>
+                                <div class="group-count-modern">
+                                    <%= stats.total %> contacts
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="group-item-modern <%= filters.favorite === 'true' ? 'active' : '' %>"
+                            data-filter="favorite">
+                            <div class="group-icon-modern"
+                                style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="group-info-modern">
+                                <div class="group-name-modern">Favorites</div>
+                                <div class="group-count-modern">
+                                    <%= stats.favorites %> contacts
+                                </div>
+                            </div>
+                        </div>
+
+                        <% if (groups.length > 0) { %>
+                            <div class="group-divider"></div>
+                            <% groups.forEach(group => { %>
+                                <div class="group-item-modern <%= filters.group_id == group.id ? 'active' : '' %>"
+                                    data-group-id="<%= group.id %>">
+                                    <div class="group-icon-modern" data-bg-color="<%= group.color %>">
+                                        <i class="fas fa-folder"></i>
+                                    </div>
+                                    <div class="group-info-modern">
+                                        <div class="group-name-modern">
+                                            <%= group.name %>
+                                        </div>
+                                        <div class="group-count-modern">
+                                            <%= group.contact_count %> contacts
+                                        </div>
+                                    </div>
+                                    <div class="group-actions-modern">
+                                        <button class="btn-icon-modern btn-edit-group" data-group-id="<%= group.id %>"
+                                            title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-icon-modern btn-delete-group" data-group-id="<%= group.id %>"
+                                            title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <% }); %>
+                                    <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content - Contacts -->
+        <div class="col-lg-9 col-md-8 contacts-main-content">
+            <!-- Sticky Search Bar for Mobile -->
+            <div class="sticky-search-mobile">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-3">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-6">
+                                <div class="search-box-modern">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="searchInput" class="form-control-modern"
+                                        placeholder="Search contacts..." value="<%= filters.search %>">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex gap-2 flex-wrap justify-content-md-end">
+                                    <button class="btn btn-outline-secondary btn-sm" data-export="txt"
+                                        title="Export as TXT">
+                                        <i class="fas fa-file-alt me-1"></i><span class="d-none d-sm-inline">TXT</span>
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" data-export="csv"
+                                        title="Export as CSV">
+                                        <i class="fas fa-file-csv me-1"></i><span class="d-none d-sm-inline">CSV</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contacts Grid -->
+            <% if (contacts.length === 0) { %>
+                <div class="card shadow-sm">
+                    <div class="card-body p-5 text-center">
+                        <div class="empty-state-modern">
+                            <div class="empty-icon-modern">
+                                <i class="fas fa-address-book"></i>
+                            </div>
+                            <h3 class="mt-4 mb-2">No contacts found</h3>
+                            <p class="text-muted mb-4">Start building your contact list by adding your first contact or
+                                importing from a file</p>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addContactModal">
+                                <i class="fas fa-plus me-2"></i>Add First Contact
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <% } else { %>
+                    <div class="row g-3">
+                        <% contacts.forEach(contact => { %>
+                            <div class="col-sm-6 col-lg-4">
+                                <div class="contact-card-modern">
+                                    <div class="contact-card-header">
+                                        <div class="contact-avatar-modern" data-bg-color="<%- contact.group_color ? contact.group_color : '#00a884' %>">
+                                            <%= contact.name.charAt(0).toUpperCase() %>
+                                        </div>
+                                        <div class="contact-actions-modern">
+                                            <button
+                                                class="btn-icon-modern btn-toggle-favorite <%= contact.is_favorite ? 'active' : '' %>"
+                                                data-contact-id="<%= contact.id %>" title="Favorite">
+                                                <i class="fas fa-star"></i>
+                                            </button>
+                                            <button class="btn-icon-modern btn-edit-contact"
+                                                data-contact-id="<%= contact.id %>" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn-icon-modern btn-delete-contact text-danger"
+                                                data-contact-id="<%= contact.id %>" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="contact-card-body">
+                                        <h5 class="contact-name-modern">
+                                            <%= contact.name %>
+                                        </h5>
+                                        <% if (contact.group_name) { %>
+                                            <span class="contact-badge-modern" data-badge-color="<%= contact.group_color %>">
+                                                <i class="fas fa-folder me-1"></i>
+                                                <%= contact.group_name %>
+                                            </span>
+                                        <% } %>
+                                        <div class="contact-phone-modern">
+                                            <i class="fas fa-phone me-2"></i>
+                                            <%= contact.phone_number %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+
+                    <!-- Pagination -->
+                    <% if (pagination && pagination.totalPages > 1) { %>
+                    <div class="pagination-wrapper mt-4">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+                            <div class="pagination-info text-muted small">
+                                Showing <%= ((pagination.page - 1) * pagination.limit) + 1 %> - <%= Math.min(pagination.page * pagination.limit, pagination.total) %> of <%= pagination.total %> contacts
+                            </div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <% if (pagination.hasPrev) { %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<%= pagination.page - 1 %><%= filters.search ? '&search=' + filters.search : '' %><%= filters.group_id ? '&group_id=' + filters.group_id : '' %><%= filters.favorite ? '&favorite=' + filters.favorite : '' %>">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    <% } %>
+                                    
+                                    <% 
+                                    let startPage = Math.max(1, pagination.page - 2);
+                                    let endPage = Math.min(pagination.totalPages, pagination.page + 2);
+                                    if (endPage - startPage < 4) {
+                                        if (startPage === 1) endPage = Math.min(5, pagination.totalPages);
+                                        else startPage = Math.max(1, endPage - 4);
+                                    }
+                                    %>
+                                    
+                                    <% if (startPage > 1) { %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1<%= filters.search ? '&search=' + filters.search : '' %><%= filters.group_id ? '&group_id=' + filters.group_id : '' %><%= filters.favorite ? '&favorite=' + filters.favorite : '' %>">1</a>
+                                        </li>
+                                        <% if (startPage > 2) { %>
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                        <% } %>
+                                    <% } %>
+                                    
+                                    <% for (let i = startPage; i <= endPage; i++) { %>
+                                        <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                                            <a class="page-link" href="?page=<%= i %><%= filters.search ? '&search=' + filters.search : '' %><%= filters.group_id ? '&group_id=' + filters.group_id : '' %><%= filters.favorite ? '&favorite=' + filters.favorite : '' %>"><%= i %></a>
+                                        </li>
+                                    <% } %>
+                                    
+                                    <% if (endPage < pagination.totalPages) { %>
+                                        <% if (endPage < pagination.totalPages - 1) { %>
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                        <% } %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<%= pagination.totalPages %><%= filters.search ? '&search=' + filters.search : '' %><%= filters.group_id ? '&group_id=' + filters.group_id : '' %><%= filters.favorite ? '&favorite=' + filters.favorite : '' %>"><%= pagination.totalPages %></a>
+                                        </li>
+                                    <% } %>
+                                    
+                                    <% if (pagination.hasNext) { %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<%= pagination.page + 1 %><%= filters.search ? '&search=' + filters.search : '' %><%= filters.group_id ? '&group_id=' + filters.group_id : '' %><%= filters.favorite ? '&favorite=' + filters.favorite : '' %>">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    <% } %>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    <% } %>
+                <% } %>
+        </div>
+    </div>
+    </div>
+
+    <!-- Add Contact Modal - Compact Mobile-Friendly Design -->
+    <div class="modal fade" id="addContactModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-contact-compact">
+            <div class="modal-content">
+                <!-- Compact Header -->
+                <div class="modal-header-compact">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="modal-icon-compact bg-success">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">Add Contact</h5>
+                            <small class="text-muted">New WhatsApp contact</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="addContactForm">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <div class="modal-body-compact">
+                        <!-- Name Input -->
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-user"></i> Name
+                            </label>
+                            <input type="text" class="form-control-compact" name="name" placeholder="Full name" required autofocus>
+                        </div>
+
+                        <!-- Phone Input -->
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-phone"></i> Phone
+                            </label>
+                            <input type="text" class="form-control-compact" name="phone_number" placeholder="1234567890" required>
+                            <small class="text-muted" style="font-size: 0.75rem;">Without + or spaces</small>
+                        </div>
+
+                        <!-- Group Select -->
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-folder"></i> Group
+                            </label>
+                            <select class="form-control-compact" name="group_id" required>
+                                <option value="">Select group</option>
+                                <% groups.forEach(group => { %>
+                                    <option value="<%= group.id %>"><%= group.name %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+
+                        <!-- Favorite Toggle -->
+                        <div class="form-check-compact">
+                            <input type="checkbox" class="form-check-input" name="is_favorite" id="addFavorite">
+                            <label class="form-check-label" for="addFavorite">
+                                <i class="fas fa-star text-warning"></i> Mark as favorite
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer-compact">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-success" id="btnSaveContact">
+                            <i class="fas fa-check me-1"></i>Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Contact Modal - Compact Mobile-Friendly Design -->
+    <div class="modal fade" id="editContactModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-contact-compact">
+            <div class="modal-content">
+                <!-- Compact Header -->
+                <div class="modal-header-compact">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="modal-icon-compact bg-primary">
+                            <i class="fas fa-user-edit"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">Edit Contact</h5>
+                            <small class="text-muted">Update information</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="editContactForm">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" id="editContactId">
+                    <div class="modal-body-compact">
+                        <!-- Name Input -->
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-user"></i> Name
+                            </label>
+                            <input type="text" class="form-control-compact" id="editName" placeholder="Full name" required>
+                        </div>
+
+                        <!-- Phone Input -->
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-phone"></i> Phone
+                            </label>
+                            <input type="text" class="form-control-compact" id="editPhone" placeholder="1234567890" required>
+                        </div>
+
+                        <!-- Group Select -->
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-folder"></i> Group
+                            </label>
+                            <select class="form-control-compact" id="editGroupId" required>
+                                <option value="">Select group</option>
+                                <% groups.forEach(group => { %>
+                                    <option value="<%= group.id %>"><%= group.name %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+
+                        <!-- Favorite Toggle -->
+                        <div class="form-check-compact">
+                            <input type="checkbox" class="form-check-input" id="editFavorite">
+                            <label class="form-check-label" for="editFavorite">
+                                <i class="fas fa-star text-warning"></i> Mark as favorite
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer-compact">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="btnUpdateContact">
+                            <i class="fas fa-save me-1"></i>Update
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Contacts Modal - Compact Mobile-Friendly Design -->
+    <div class="modal fade" id="importModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-import-compact">
+            <div class="modal-content modal-import-content">
+                <!-- Compact Header -->
+                <div class="modal-import-header-compact">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="import-icon-compact">
+                            <i class="fas fa-file-import"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">Import Contacts</h5>
+                            <small class="text-muted">TXT or CSV file</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-import-body-compact">
+                    <!-- Group Selection -->
+                    <div class="mb-3">
+                        <label class="form-label-compact">
+                            <i class="fas fa-folder"></i> Group
+                        </label>
+                        <select class="form-control-compact" id="importGroupId" required>
+                            <option value="">Select group</option>
+                            <% groups.forEach(group => { %>
+                                <option value="<%= group.id %>"><%= group.name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <!-- Compact File Upload -->
+                    <div class="file-upload-compact file-upload-area" id="fileUploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span><strong>Upload file</strong> or drag here</span>
+                        <input type="file" id="importFile" accept=".txt,.csv" style="display: none;">
+                    </div>
+
+                    <!-- Selected File Display -->
+                    <div class="selected-file-compact" id="selectedFileInfo" style="display: none;">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 min-width-0">
+                            <i class="fas fa-file-alt text-success"></i>
+                            <span class="file-name-compact text-truncate" id="fileName"></span>
+                            <small class="text-muted" id="fileSize"></small>
+                        </div>
+                        <button type="button" class="btn-remove-compact" onclick="clearSelectedFile()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Collapsible Format Info -->
+                    <div class="format-info-compact">
+                        <div class="format-toggle" data-bs-toggle="collapse" data-bs-target="#formatHelp">
+                            <i class="fas fa-info-circle text-info"></i>
+                            <span>Format: <code>Name,Phone</code></span>
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </div>
+                        <div class="collapse" id="formatHelp">
+                            <div class="format-details">
+                                <code>John Doe,1234567890</code>
+                                <div class="d-flex gap-2 mt-2">
+                                    <button class="btn btn-sm btn-outline-secondary flex-grow-1" id="btnDownloadSampleTXT">
+                                        <i class="fas fa-download"></i> TXT
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary flex-grow-1" id="btnDownloadSampleCSV">
+                                        <i class="fas fa-download"></i> CSV
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Import Progress -->
+                    <div id="importProgress" class="import-progress-compact" style="display: none;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="spinner-border spinner-border-sm text-success"></div>
+                            <span>Importing...</span>
+                        </div>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-import-footer-compact">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="btnCancelImport">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnImportContacts">
+                        <i class="fas fa-upload me-1"></i>Import
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Group Modal - Compact Design -->
+    <div class="modal fade" id="createGroupModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-contact-compact">
+            <div class="modal-content">
+                <div class="modal-header-compact">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="modal-icon-compact" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">New Group</h5>
+                            <small class="text-muted">Organize contacts</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="createGroupForm">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <div class="modal-body-compact">
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-tag"></i> Name
+                            </label>
+                            <input type="text" class="form-control-compact" name="name" placeholder="Group name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-align-left"></i> Description
+                            </label>
+                            <textarea class="form-control-compact" name="description" rows="2" placeholder="Optional..."></textarea>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label-compact">
+                                <i class="fas fa-palette"></i> Color
+                            </label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="color-input-compact" name="color" value="#00a884">
+                                <span class="text-muted small">Choose group color</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer-compact">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-success" id="btnSaveGroup">
+                            <i class="fas fa-check me-1"></i>Create
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Group Modal - Compact Design -->
+    <div class="modal fade" id="editGroupModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-contact-compact">
+            <div class="modal-content">
+                <div class="modal-header-compact">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="modal-icon-compact bg-primary">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">Edit Group</h5>
+                            <small class="text-muted">Update info</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="editGroupForm">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" id="editGroupId">
+                    <div class="modal-body-compact">
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-tag"></i> Name
+                            </label>
+                            <input type="text" class="form-control-compact" id="editGroupName" placeholder="Group name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-align-left"></i> Description
+                            </label>
+                            <textarea class="form-control-compact" id="editGroupDescription" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label-compact">
+                                <i class="fas fa-palette"></i> Color
+                            </label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="color-input-compact" id="editGroupColor">
+                                <span class="text-muted small">Choose group color</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer-compact">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="btnUpdateGroup">
+                            <i class="fas fa-save me-1"></i>Update
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/contacts.js"></script>
+    <script>
+        // Apply dynamic colors from data attributes
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply background colors
+            document.querySelectorAll('[data-bg-color]').forEach(function(el) {
+                var color = el.getAttribute('data-bg-color');
+                if (el.classList.contains('contact-avatar-modern')) {
+                    el.style.background = 'linear-gradient(135deg, ' + color + ', ' + color + ')';
+                } else {
+                    el.style.backgroundColor = color;
+                }
+            });
+            // Apply badge colors
+            document.querySelectorAll('[data-badge-color]').forEach(function(el) {
+                var color = el.getAttribute('data-badge-color');
+                el.style.background = color + '20';
+                el.style.color = color;
+            });
+            
+            // Mobile Groups Toggle
+            var mobileGroupsToggle = document.getElementById('mobileGroupsToggle');
+            var groupsSidebar = document.getElementById('groupsSidebar');
+            
+            if (mobileGroupsToggle && groupsSidebar) {
+                mobileGroupsToggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    groupsSidebar.classList.toggle('show');
+                });
+            }
+        });
+    </script>

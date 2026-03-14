@@ -1,0 +1,162 @@
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/settings">Settings</a></li>
+                    <li class="breadcrumb-item active">Notifications</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-bell text-primary me-2"></i>Notification Settings
+            </h1>
+            <p class="text-muted">Configure telegram notifications and alerts</p>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <% if (typeof session !== 'undefined' && session.message) { %>
+        <div class="alert alert-<%= session.message.type %> alert-dismissible fade show" role="alert">
+            <%= session.message.text %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% delete session.message; %>
+    <% } %>
+
+    <div class="row">
+        <!-- Notification Settings Form -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fab fa-telegram fa-2x text-primary me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Telegram Notifications</h5>
+                            <small class="text-muted">Send automated alerts to a Telegram Group</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/settings/notifications">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                        <!-- Telegram Bot Token -->
+                        <div class="mb-3">
+                            <label for="telegramBotToken" class="form-label">
+                                <i class="fas fa-key me-1"></i>Telegram Bot Token
+                            </label>
+                            <input type="password" class="form-control" id="telegramBotToken" 
+                                   name="telegramBotToken" 
+                                   placeholder="<%= settings.hasTelegramToken ? '••••••••••••••••••••••••••••••••' : 'Enter your Telegram Bot Token' %>">
+                            <div class="form-text">
+                                Leave blank to keep existing token. Get this from <a href="https://t.me/BotFather" target="_blank">@BotFather</a>.
+                            </div>
+                        </div>
+
+                        <!-- Telegram Group ID -->
+                        <div class="mb-4">
+                            <label for="telegramGroupId" class="form-label">
+                                <i class="fas fa-users me-1"></i>Telegram Chat ID / Group ID
+                            </label>
+                            <input type="text" class="form-control" id="telegramGroupId" 
+                                   name="telegramGroupId" 
+                                   value="<%= settings.telegramGroupId %>"
+                                   placeholder="Enter Telegram Chat or Group ID (e.g. -100123456789)">
+                            <div class="form-text">
+                                The ID of the chat or group where notifications should be sent.
+                            </div>
+                        </div>
+                        
+                        <!-- Test Connection Button -->
+                        <div class="mb-4">
+                            <button type="button" class="btn btn-outline-primary" onclick="testTelegramConnection()">
+                                <i class="fas fa-paper-plane me-1"></i>Send Test Notification
+                            </button>
+                            <div id="testResult" class="mt-2"></div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Settings
+                            </button>
+                            <a href="/settings" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>Information
+                    </h6>
+                </div>
+                <div class="card-body bg-light">
+                    <p class="small text-muted mb-2">When telegram is configured, the system will automatically send alerts when:</p>
+                    <ul class="small text-muted mb-0">
+                        <li>A WhatsApp session gets disconnected</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function testTelegramConnection() {
+    const resultDiv = document.getElementById('testResult');
+    const telegramBotToken = document.getElementById('telegramBotToken').value;
+    const telegramGroupId = document.getElementById('telegramGroupId').value;
+    
+    if (!telegramGroupId) {
+        resultDiv.innerHTML = '<div class="alert alert-warning">Please enter Telegram Group ID to send a test message.</div>';
+        return;
+    }
+    
+    resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Sending test message...</div>';
+    
+    try {
+        const response = await fetch('/webapi/settings/test-telegram', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-csrf-token': '<%= csrfToken %>'
+            },
+            body: JSON.stringify({
+                telegramBotToken: telegramBotToken || undefined,
+                telegramGroupId
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Test message sent successfully!</strong>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle me-2"></i>
+                    <strong>Failed:</strong> ${data.error}
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle me-2"></i>
+                <strong>Error:</strong> ${error.message}
+            </div>
+        `;
+    }
+}
+</script>

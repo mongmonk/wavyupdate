@@ -1,0 +1,650 @@
+<% currentPage='users' %>
+
+<!-- Page Header -->
+<div class="dashboard-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h2 class="mb-1 fw-bold"><i class="fas fa-users me-2 text-primary"></i>User Management</h2>
+            <p class="text-muted mb-0">Manage system users and their access</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <button class="btn btn-success btn-lg shadow-sm w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                <i class="fas fa-user-plus me-2"></i>Add New User
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary active" data-filter="all">
+                        <i class="fas fa-users me-1"></i>All Users
+                    </button>
+                    <button type="button" class="btn btn-outline-success" data-filter="active">
+                        <i class="fas fa-check-circle me-1"></i>Active
+                    </button>
+                    <button type="button" class="btn btn-outline-danger" data-filter="banned">
+                        <i class="fas fa-ban me-1"></i>Banned
+                    </button>
+                    <button type="button" class="btn btn-outline-warning" data-filter="admin">
+                        <i class="fas fa-crown me-1"></i>Admins
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6 mt-3 mt-md-0">
+                <input type="text" class="form-control" id="searchUsers" placeholder="Search users...">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom">
+        <h5 class="mb-0">
+            <i class="fas fa-list me-2 text-success"></i>
+            System Users
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="usersTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4"><i class="fas fa-hashtag me-1"></i>ID</th>
+                        <th><i class="fas fa-user me-1"></i>User</th>
+                        <th><i class="fas fa-phone me-1"></i>Phone</th>
+                        <th><i class="fas fa-crown me-1"></i>Plan</th>
+                        <th><i class="fas fa-shield-alt me-1"></i>Role</th>
+                        <th><i class="fas fa-clock me-1"></i>Last Login</th>
+                        <th class="text-center pe-4"><i class="fas fa-cogs me-1"></i>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Users will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2 text-success"></i>Add New User
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createUserForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="fullname" class="form-label">
+                            <i class="fas fa-user me-1"></i>Full Name
+                        </label>
+                        <input type="text" class="form-control" id="fullname" name="fullname" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope me-1"></i>Email
+                        </label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                        <div class="form-text">Email must be unique</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-1"></i>Password
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" required minlength="6">
+                        <div class="form-text">Minimum 6 characters</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">
+                            <i class="fas fa-lock me-1"></i>Confirm Password
+                        </label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="role" class="form-label">
+                            <i class="fas fa-shield-alt me-1"></i>Role
+                        </label>
+                        <select class="form-select" id="role" name="role">
+                            <option value="user" selected>User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-user-plus me-2"></i>Create User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-key me-2 text-warning"></i>Change Password
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="changePasswordForm">
+                <input type="hidden" id="changePasswordUserId">
+                <div class="modal-body">
+                    <p>Change password for: <strong id="changePasswordUsername"></strong></p>
+                    
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">
+                            <i class="fas fa-lock me-1"></i>New Password
+                        </label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" required minlength="6">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirmNewPassword" class="form-label">
+                            <i class="fas fa-lock me-1"></i>Confirm New Password
+                        </label>
+                        <input type="password" class="form-control" id="confirmNewPassword" name="confirmNewPassword" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-key me-2"></i>Change Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Get CSRF token from meta tag
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : null;
+}
+
+// Clean up modal backdrops (fix for stuck black overlay)
+function cleanupModalBackdrops() {
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+}
+
+// Helper function to make authenticated requests
+async function fetchWithCsrf(url, options = {}) {
+    const csrfToken = getCsrfToken();
+    const headers = options.headers || {};
+    
+    if (csrfToken && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method?.toUpperCase())) {
+        headers['x-csrf-token'] = csrfToken;
+    }
+    
+    return fetch(url, {
+        ...options,
+        headers
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadUsers();
+    setupEventListeners();
+    setupFilters();
+    
+    // Clean up any stuck modal backdrops on page load
+    cleanupModalBackdrops();
+    
+    // Add event listener to clean up when modals are hidden
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', function() {
+            cleanupModalBackdrops();
+        });
+    });
+});
+
+function setupEventListeners() {
+    document.getElementById('createUserForm').addEventListener('submit', createUser);
+    document.getElementById('changePasswordForm').addEventListener('submit', changePassword);
+    
+    document.getElementById('usersTable').addEventListener('click', function(e) {
+        const button = e.target.closest('button[data-action]');
+        if (!button) return;
+        
+        const userId = button.getAttribute('data-id');
+        const username = button.getAttribute('data-username');
+        const action = button.getAttribute('data-action');
+        
+        switch (action) {
+            case 'change-password':
+                showChangePassword(userId, username);
+                break;
+            case 'ban':
+                showBanUser(userId, username);
+                break;
+            case 'unban':
+                showUnbanUser(userId, username);
+                break;
+            case 'delete':
+                showDeleteUser(userId, username);
+                break;
+        }
+    });
+}
+
+async function loadUsers() {
+    try {
+        const response = await fetch('/webapi/users');
+        const data = await response.json();
+        
+        if (data.success) {
+            updateUsersTable(data.users);
+        } else {
+            Toast.error(data.message || 'Failed to load users');
+        }
+    } catch (error) {
+        console.error('Error loading users:', error);
+        Toast.error('Error loading users');
+    }
+}
+
+// Get current user ID from session
+function getCurrentUserId() {
+    // Get from meta tag set by server
+    const meta = document.querySelector('meta[name="user-id"]');
+    return meta ? parseInt(meta.getAttribute('content')) : null;
+}
+
+function updateUsersTable(users) {
+    const tbody = document.querySelector('#usersTable tbody');
+    tbody.innerHTML = '';
+    
+    if (!users || users.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-5">
+                    <i class="fas fa-users text-muted fa-3x mb-3 d-block"></i>
+                    <h5 class="text-muted">No Users Found</h5>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const currentUserId = getCurrentUserId();
+    
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        const lastLogin = user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never';
+        const isBanned = Boolean(user.is_banned);
+        const isAdmin = Boolean(user.is_admin);
+        const isCurrentUser = user.id === currentUserId;
+        const phoneVerified = Boolean(user.phone_verified);
+        
+        // Add data attributes for filtering
+        row.setAttribute('data-username', user.username.toLowerCase());
+        row.setAttribute('data-email', (user.email || '').toLowerCase());
+        row.setAttribute('data-banned', isBanned);
+        row.setAttribute('data-admin', isAdmin);
+        
+        if (isBanned) {
+            row.classList.add('table-danger');
+        }
+        
+        row.innerHTML = `
+            <td class="ps-4 fw-bold">${user.id}</td>
+            <td>
+                <div>
+                    <div class="fw-semibold">${escapeHtml(user.fullname || user.username)} ${isCurrentUser ? '<span class="badge bg-info ms-1">You</span>' : ''}</div>
+                    <small class="text-muted">${escapeHtml(user.email || 'N/A')}</small>
+                    ${isBanned ? '<br><span class="badge bg-danger mt-1"><i class="fas fa-ban me-1"></i>Banned</span>' : ''}
+                </div>
+            </td>
+            <td>
+                ${user.phone_number ? `
+                    <div>
+                        <span>${escapeHtml(formatPhoneNumber(user.phone_number))}</span>
+                        ${phoneVerified ? '<i class="fas fa-check-circle text-success ms-1" title="Verified"></i>' : '<i class="fas fa-times-circle text-muted ms-1" title="Not Verified"></i>'}
+                    </div>
+                ` : '<span class="text-muted">-</span>'}
+            </td>
+            <td>
+                ${user.tier ? `<span class="badge bg-success">Plan #${user.tier}</span>` : '<span class="badge bg-secondary">No Plan</span>'}
+            </td>
+            <td>
+                ${isAdmin ? '<span class="badge bg-warning"><i class="fas fa-crown me-1"></i>Admin</span>' : '<span class="badge bg-secondary">User</span>'}
+            </td>
+            <td>${lastLogin}</td>
+            <td class="text-center pe-4">
+                <div class="d-flex justify-content-center gap-1">
+                    ${!isCurrentUser ? `
+                        <button class="btn btn-sm btn-warning" data-action="change-password" 
+                                data-id="${user.id}" data-username="${escapeHtml(user.username)}"
+                                title="Change Password">
+                            <i class="fas fa-key"></i>
+                        </button>
+                    ` : ''}
+                    ${!isAdmin && !isCurrentUser ? `
+                        ${isBanned ? `
+                            <button class="btn btn-sm btn-success" data-action="unban" 
+                                    data-id="${user.id}" data-username="${escapeHtml(user.username)}"
+                                    title="Unban User">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        ` : `
+                            <button class="btn btn-sm btn-warning" data-action="ban" 
+                                    data-id="${user.id}" data-username="${escapeHtml(user.username)}"
+                                    title="Ban User">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        `}
+                        <button class="btn btn-sm btn-danger" data-action="delete" 
+                                data-id="${user.id}" data-username="${escapeHtml(user.username)}"
+                                title="Delete User">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : ''}
+                    ${isCurrentUser ? '<span class="text-muted small">Your Account</span>' : ''}
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+async function createUser(e) {
+    e.preventDefault();
+    
+    const fullname = document.getElementById('fullname').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const role = document.getElementById('role').value;
+    
+    if (password !== confirmPassword) {
+        Toast.error('Passwords do not match');
+        return;
+    }
+    
+    try {
+        const response = await fetchWithCsrf('/webapi/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullname, email, password, is_admin: role === 'admin' })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
+            if (modal) {
+                modal.hide();
+            }
+            cleanupModalBackdrops();
+            
+            document.getElementById('createUserForm').reset();
+            loadUsers();
+            Toast.success('User created successfully!');
+        } else {
+            Toast.error(data.message || 'Failed to create user');
+        }
+    } catch (error) {
+        console.error('Error creating user:', error);
+        Toast.error('Error creating user');
+    }
+}
+
+function showChangePassword(userId, username) {
+    document.getElementById('changePasswordUserId').value = userId;
+    document.getElementById('changePasswordUsername').textContent = username;
+    new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
+}
+
+async function changePassword(e) {
+    e.preventDefault();
+    
+    const userId = document.getElementById('changePasswordUserId').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+    
+    if (newPassword !== confirmNewPassword) {
+        Toast.error('Passwords do not match');
+        return;
+    }
+    
+    try {
+        const response = await fetchWithCsrf(`/webapi/users/${userId}/password`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: newPassword })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+            if (modal) {
+                modal.hide();
+            }
+            cleanupModalBackdrops();
+            
+            document.getElementById('changePasswordForm').reset();
+            Toast.success('Password changed successfully!');
+        } else {
+            Toast.error(data.message || 'Failed to change password');
+        }
+    } catch (error) {
+        console.error('Error changing password:', error);
+        Toast.error('Error changing password');
+    }
+}
+
+function showBanUser(userId, username) {
+    ConfirmModal.show({
+        title: 'Ban User',
+        message: `Are you sure you want to ban user <strong>${escapeHtml(username)}</strong>?<br><small class="text-muted">They will be logged out immediately and cannot access the system.</small>`,
+        confirmText: 'Ban User',
+        cancelText: 'Cancel',
+        type: 'warning',
+        icon: 'fa-ban',
+        onConfirm: async () => {
+            try {
+                const response = await fetchWithCsrf(`/webapi/users/${userId}/ban`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadUsers();
+                    Toast.success('User banned successfully!');
+                } else {
+                    Toast.error(data.message || 'Failed to ban user');
+                }
+            } catch (error) {
+                console.error('Error banning user:', error);
+                Toast.error('Error banning user');
+            }
+        }
+    });
+}
+
+function showUnbanUser(userId, username) {
+    ConfirmModal.show({
+        title: 'Unban User',
+        message: `Are you sure you want to unban user <strong>${escapeHtml(username)}</strong>?<br><small class="text-muted">They will be able to access the system again.</small>`,
+        confirmText: 'Unban User',
+        cancelText: 'Cancel',
+        type: 'success',
+        icon: 'fa-check',
+        onConfirm: async () => {
+            try {
+                const response = await fetchWithCsrf(`/webapi/users/${userId}/unban`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadUsers();
+                    Toast.success('User unbanned successfully!');
+                } else {
+                    Toast.error(data.message || 'Failed to unban user');
+                }
+            } catch (error) {
+                console.error('Error unbanning user:', error);
+                Toast.error('Error unbanning user');
+            }
+        }
+    });
+}
+
+function showDeleteUser(userId, username) {
+    ConfirmModal.show({
+        title: 'Delete User',
+        message: `Are you sure you want to delete user <strong>${escapeHtml(username)}</strong>?<br><small class="text-muted">This action cannot be undone!</small>`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        type: 'danger',
+        icon: 'fa-user-times',
+        onConfirm: async () => {
+            try {
+                const response = await fetchWithCsrf(`/webapi/users/${userId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadUsers();
+                    Toast.success('User deleted successfully!');
+                } else {
+                    Toast.error(data.message || 'Failed to delete user');
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                Toast.error('Error deleting user');
+            }
+        }
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Format phone number from +923xxxxxxxxx to 03xxxxxxxxx
+function formatPhoneNumber(phone) {
+    if (!phone) return '';
+    // Remove + and convert 92 prefix to 0
+    let cleaned = phone.replace(/^\+/, '');
+    if (cleaned.startsWith('92')) {
+        return '0' + cleaned.substring(2);
+    }
+    return phone;
+}
+
+// Setup filter functionality
+function setupFilters() {
+    // Filter buttons
+    document.querySelectorAll('[data-filter]').forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active button
+            document.querySelectorAll('[data-filter]').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            filterUsers(filter);
+        });
+    });
+    
+    // Search input
+    document.getElementById('searchUsers').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        searchUsers(searchTerm);
+    });
+}
+
+// Filter users by status
+function filterUsers(filter) {
+    const rows = document.querySelectorAll('#usersTable tbody tr');
+    
+    rows.forEach(row => {
+        if (row.querySelector('td[colspan]')) return; // Skip "no users" row
+        
+        const isBanned = row.getAttribute('data-banned') === 'true';
+        const isAdmin = row.getAttribute('data-admin') === 'true';
+        
+        let show = false;
+        
+        switch(filter) {
+            case 'all':
+                show = true;
+                break;
+            case 'active':
+                show = !isBanned;
+                break;
+            case 'banned':
+                show = isBanned;
+                break;
+            case 'admin':
+                show = isAdmin;
+                break;
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+    
+    updateFilterCount();
+}
+
+// Search users
+function searchUsers(searchTerm) {
+    const rows = document.querySelectorAll('#usersTable tbody tr');
+    
+    rows.forEach(row => {
+        if (row.querySelector('td[colspan]')) return; // Skip "no users" row
+        
+        const username = row.getAttribute('data-username');
+        const email = row.getAttribute('data-email');
+        
+        const matches = username.includes(searchTerm) || email.includes(searchTerm);
+        row.style.display = matches ? '' : 'none';
+    });
+    
+    updateFilterCount();
+}
+
+// Update visible count
+function updateFilterCount() {
+    const rows = document.querySelectorAll('#usersTable tbody tr');
+    const visibleRows = Array.from(rows).filter(row => 
+        row.style.display !== 'none' && !row.querySelector('td[colspan]')
+    );
+    
+    // You can add a count display here if needed
+    console.log(`Showing ${visibleRows.length} users`);
+}
+</script>

@@ -1,0 +1,404 @@
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/settings">Settings</a></li>
+                    <li class="breadcrumb-item active">WhatsApp OTP</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0">
+                <i class="fab fa-whatsapp text-success me-2"></i>WhatsApp OTP Settings
+            </h1>
+            <p class="text-muted">Configure WhatsApp Business API for OTP verification</p>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <% if (typeof session !== 'undefined' && session.message) { %>
+        <div class="alert alert-<%= session.message.type %> alert-dismissible fade show" role="alert">
+            <%= session.message.text %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% delete session.message; %>
+    <% } %>
+
+    <div class="row">
+        <!-- WABA Settings Form -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fab fa-whatsapp fa-2x text-success me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">WhatsApp Business API (WABA)</h5>
+                            <small class="text-muted">Send OTP verification codes via WhatsApp</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/settings/whatsapp-otp">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        
+                        <!-- Enable/Disable Toggle -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="wabaOtpEnabled" 
+                                       name="wabaOtpEnabled" <%= settings.wabaOtpEnabled ? 'checked' : '' %>>
+                                <label class="form-check-label" for="wabaOtpEnabled">
+                                    <strong>Enable WhatsApp OTP</strong>
+                                </label>
+                            </div>
+                            <small class="text-muted">
+                                When enabled, users can verify their phone numbers via WhatsApp OTP
+                            </small>
+                        </div>
+
+                        <hr>
+
+                        <!-- WABA Phone Number ID -->
+                        <div class="mb-3">
+                            <label for="wabaPhoneNumberId" class="form-label">
+                                <i class="fas fa-phone me-1"></i>Phone Number ID
+                            </label>
+                            <input type="text" class="form-control" id="wabaPhoneNumberId" 
+                                   name="wabaPhoneNumberId" 
+                                   value="<%= settings.wabaPhoneNumberId %>"
+                                   placeholder="Enter your WhatsApp Business Phone Number ID">
+                            <div class="form-text">
+                                Get this from <a href="https://business.facebook.com/wa/manage/phone-numbers/" target="_blank">Meta Business Manager</a>
+                            </div>
+                        </div>
+
+                        <!-- WABA Access Token -->
+                        <div class="mb-3">
+                            <label for="wabaAccessToken" class="form-label">
+                                <i class="fas fa-key me-1"></i>Access Token
+                            </label>
+                            <input type="password" class="form-control" id="wabaAccessToken" 
+                                   name="wabaAccessToken" 
+                                   placeholder="<%= settings.hasWabaToken ? '••••••••••••••••••••••••••••••••' : 'Enter your WhatsApp Business API Access Token' %>">
+                            <div class="form-text">
+                                Leave blank to keep existing token. Get this from Meta Business Manager.
+                            </div>
+                        </div>
+
+                        <!-- WABA Business Account ID (Optional) -->
+                        <div class="mb-3">
+                            <label for="wabaBusinessAccountId" class="form-label">
+                                <i class="fas fa-building me-1"></i>Business Account ID
+                                <span class="badge bg-secondary ms-2">Optional</span>
+                            </label>
+                            <input type="text" class="form-control" id="wabaBusinessAccountId" 
+                                   name="wabaBusinessAccountId" 
+                                   value="<%= settings.wabaBusinessAccountId %>"
+                                   placeholder="Enter your WhatsApp Business Account ID">
+                            <div class="form-text">
+                                Optional. Used for advanced features and analytics.
+                            </div>
+                        </div>
+
+                        <!-- API Version -->
+                        <div class="mb-4">
+                            <label for="wabaApiVersion" class="form-label">
+                                <i class="fas fa-code-branch me-1"></i>API Version
+                            </label>
+                            <select class="form-select" id="wabaApiVersion" name="wabaApiVersion">
+                                <option value="v18.0" <%= settings.wabaApiVersion === 'v18.0' ? 'selected' : '' %>>v18.0</option>
+                                <option value="v19.0" <%= settings.wabaApiVersion === 'v19.0' ? 'selected' : '' %>>v19.0</option>
+                                <option value="v20.0" <%= settings.wabaApiVersion === 'v20.0' ? 'selected' : '' %>>v20.0</option>
+                                <option value="v21.0" <%= settings.wabaApiVersion === 'v21.0' ? 'selected' : '' %>>v21.0</option>
+                                <option value="v22.0" <%= settings.wabaApiVersion === 'v22.0' ? 'selected' : '' %>>v22.0</option>
+                                <option value="v24.0" <%= settings.wabaApiVersion === 'v24.0' ? 'selected' : '' %>>v24.0 (Latest)</option>
+                            </select>
+                        </div>
+
+                        <!-- Test Connection Button -->
+                        <div class="mb-4">
+                            <button type="button" class="btn btn-outline-primary" onclick="testWabaConnection()">
+                                <i class="fas fa-plug me-1"></i>Test Connection
+                            </button>
+                            <div id="testResult" class="mt-2"></div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Settings
+                            </button>
+                            <a href="/settings" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- OTP Template Selection -->
+        <div class="col-lg-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-alt me-2"></i>OTP Template
+                    </h5>
+                    <button type="button" class="btn btn-sm btn-light" onclick="fetchTemplates()" title="Refresh templates">
+                        <i class="fas fa-sync-alt" id="refreshIcon"></i>
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Current Template Display -->
+                    <div class="p-3 bg-light border-bottom">
+                        <small class="text-muted d-block mb-1">Selected Template</small>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong id="currentTemplate"><%= settings.wabaOtpTemplateName || 'Not configured' %></strong>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="templateLoading" style="display: none;" class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        <span class="text-muted">Loading templates...</span>
+                    </div>
+
+                    <!-- Error State -->
+                    <div id="templateError" class="alert alert-danger m-3 small" style="display: none;"></div>
+
+                    <!-- Template List -->
+                    <div id="templateList" style="display: none;">
+                        <div class="p-2 bg-white border-bottom">
+                            <small class="text-muted"><span id="templateCount">0</span> templates found</small>
+                        </div>
+                        <div id="templateListContent" style="max-height: 350px; overflow-y: auto;">
+                            <!-- Templates will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="templateEmpty" class="text-center py-4 px-3" style="display: none;">
+                        <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                        <p class="text-muted small mb-0">No templates found</p>
+                    </div>
+
+                    <!-- Initial State -->
+                    <div id="templateInitial" class="text-center py-4 px-3">
+                        <i class="fas fa-cloud-download-alt fa-2x text-muted mb-2"></i>
+                        <p class="text-muted small mb-2">Click refresh to load templates</p>
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="fetchTemplates()">
+                            <i class="fas fa-sync-alt me-1"></i>Load Templates
+                        </button>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Use templates with <code>{{1}}</code> for OTP
+                    </small>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-external-link-alt me-2 text-primary"></i>Quick Links
+                    </h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="https://business.facebook.com/wa/manage/message-templates/" target="_blank" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="fas fa-file-alt text-success me-3"></i>
+                        <div>
+                            <div class="fw-medium">Message Templates</div>
+                            <small class="text-muted">Create & manage templates</small>
+                        </div>
+                    </a>
+                    <a href="https://business.facebook.com/wa/manage/phone-numbers/" target="_blank" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="fas fa-phone text-primary me-3"></i>
+                        <div>
+                            <div class="fw-medium">Phone Numbers</div>
+                            <small class="text-muted">Manage test numbers</small>
+                        </div>
+                    </a>
+                    <a href="https://business.facebook.com/latest/settings" target="_blank" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="fas fa-cog text-secondary me-3"></i>
+                        <div>
+                            <div class="fw-medium">Business Settings</div>
+                            <small class="text-muted">Account configuration</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.template-item:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+.template-item.bg-success:hover {
+    background-color: rgba(25, 135, 84, 0.15) !important;
+}
+</style>
+
+<script>
+async function testWabaConnection() {
+    const resultDiv = document.getElementById('testResult');
+    const phoneNumberId = document.getElementById('wabaPhoneNumberId').value;
+    const accessToken = document.getElementById('wabaAccessToken').value;
+    const apiVersion = document.getElementById('wabaApiVersion').value;
+    
+    if (!phoneNumberId) {
+        resultDiv.innerHTML = '<div class="alert alert-warning">Please enter Phone Number ID</div>';
+        return;
+    }
+    
+    resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Testing connection...</div>';
+    
+    try {
+        const response = await fetch('/webapi/settings/test-waba', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-csrf-token': '<%= csrfToken %>'
+            },
+            body: JSON.stringify({
+                phoneNumberId,
+                accessToken: accessToken || undefined,
+                apiVersion
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Connection successful!</strong>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle me-2"></i>
+                    <strong>Connection failed:</strong> ${data.error}
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle me-2"></i>
+                <strong>Error:</strong> ${error.message}
+            </div>
+        `;
+    }
+}
+
+async function fetchTemplates() {
+    const listDiv = document.getElementById('templateList');
+    const listContent = document.getElementById('templateListContent');
+    const loadingDiv = document.getElementById('templateLoading');
+    const errorDiv = document.getElementById('templateError');
+    const emptyDiv = document.getElementById('templateEmpty');
+    const initialDiv = document.getElementById('templateInitial');
+    const refreshIcon = document.getElementById('refreshIcon');
+    const countSpan = document.getElementById('templateCount');
+    
+    // Hide all states
+    listDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    emptyDiv.style.display = 'none';
+    initialDiv.style.display = 'none';
+    loadingDiv.style.display = 'block';
+    refreshIcon.classList.add('fa-spin');
+    
+    try {
+        const response = await fetch('/webapi/settings/waba-templates', {
+            method: 'GET',
+            headers: {
+                'x-csrf-token': '<%= csrfToken %>'
+            }
+        });
+        
+        const data = await response.json();
+        loadingDiv.style.display = 'none';
+        refreshIcon.classList.remove('fa-spin');
+        
+        if (data.success && data.templates) {
+            if (data.templates.length === 0) {
+                emptyDiv.style.display = 'block';
+                return;
+            }
+            
+            const currentTemplate = document.getElementById('currentTemplate').textContent;
+            countSpan.textContent = data.templates.length;
+            
+            listContent.innerHTML = data.templates.map(t => {
+                const isSelected = t.name === currentTemplate;
+                const statusColor = t.status === 'APPROVED' ? 'success' : (t.status === 'PENDING' ? 'warning' : 'secondary');
+                const categoryIcon = t.category === 'AUTHENTICATION' ? 'fa-shield-alt' : (t.category === 'MARKETING' ? 'fa-bullhorn' : 'fa-tools');
+                const hasOtpParam = t.hasParameter;
+                
+                return `
+                <div class="template-item p-3 border-bottom ${isSelected ? 'bg-success bg-opacity-10' : ''}" 
+                     style="cursor: pointer;" onclick="selectTemplate('${t.name}')">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-1">
+                                <strong class="me-2">${t.name}</strong>
+                                ${isSelected ? '<i class="fas fa-check-circle text-success"></i>' : ''}
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mb-1">
+                                <span class="badge bg-${statusColor}">${t.status}</span>
+                                <span class="badge bg-light text-dark"><i class="fas ${categoryIcon} me-1"></i>${t.category}</span>
+                                <span class="badge bg-light text-dark">${t.language}</span>
+                                ${hasOtpParam ? '<span class="badge bg-info"><i class="fas fa-check me-1"></i>{{1}}</span>' : ''}
+                            </div>
+                            ${t.preview ? `<small class="text-muted d-block text-truncate" style="max-width: 200px;">${t.preview}...</small>` : ''}
+                        </div>
+                        ${!isSelected ? '<i class="fas fa-chevron-right text-muted"></i>' : ''}
+                    </div>
+                </div>
+                `;
+            }).join('');
+            
+            listDiv.style.display = 'block';
+        } else {
+            errorDiv.textContent = data.error || 'Failed to fetch templates';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        loadingDiv.style.display = 'none';
+        refreshIcon.classList.remove('fa-spin');
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+    }
+}
+
+async function selectTemplate(templateName) {
+    try {
+        const response = await fetch('/webapi/settings/waba-otp-template', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-csrf-token': '<%= csrfToken %>'
+            },
+            body: JSON.stringify({ templateName })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('currentTemplate').textContent = templateName;
+            Toast.success('Template saved!');
+            fetchTemplates();
+        } else {
+            Toast.error(data.error || 'Failed to save template');
+        }
+    } catch (error) {
+        Toast.error(error.message);
+    }
+}
+</script>

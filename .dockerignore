@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+.env
+sessions
+uploads
+.git
+.gitignore
+README.md
+Dockerfile
+docker-compose.yml
+AGENTS.md
+.agent/
+.antigravity/

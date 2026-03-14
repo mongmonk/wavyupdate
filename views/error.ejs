@@ -1,0 +1,49 @@
+<div class="container">
+    <div class="min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="text-center fade-in-up">
+            <div class="mb-4">
+                <i class="fas fa-exclamation-triangle error-icon-large"></i>
+            </div>
+
+            <h1 class="display-4 mb-3 fw-bold text-primary"><%= title || 'Error' %></h1>
+
+            <p class="lead mb-4 text-muted">
+                <%= message || 'An unexpected error occurred' %>
+            </p>
+
+            <% if (typeof error !== 'undefined' && error && error.message) { %>
+                <div class="alert alert-warning text-start mb-4 fade-in-up">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Details:</strong> <%= error.message %>
+                </div>
+            <% } %>
+
+            <% if (typeof isDevelopment !== 'undefined' && isDevelopment && error && error.stack) { %>
+                <div class="alert alert-danger text-start mb-4 fade-in-up">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-bug me-2"></i>Development Mode - Full Error Details
+                    </h5>
+                    <hr>
+                    <p><strong>Error Type:</strong> <%= error.name || 'Error' %></p>
+                    <% if (typeof statusCode !== 'undefined') { %>
+                        <p><strong>Status Code:</strong> <%= statusCode %></p>
+                    <% } %>
+                    <p><strong>Message:</strong> <%= error.message %></p>
+                    <hr>
+                    <p class="mb-0"><strong>Stack Trace:</strong></p>
+                    <pre class="bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto; font-size: 0.85rem;"><%= error.stack %></pre>
+                </div>
+            <% } %>
+
+            <div class="d-flex gap-3 justify-content-center fade-in-up error-buttons-container">
+                <button onclick="history.back()" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Go Back
+                </button>
+
+                <a href="/dashboard" class="btn btn-success btn-lg">
+                    <i class="fas fa-home me-2"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

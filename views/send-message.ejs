@@ -1,0 +1,259 @@
+<% currentPage = 'send-message' %>
+
+<!-- Page Header -->
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a href="/dashboard" class="btn btn-light btn-sm" style="min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="flex-grow-1">
+        <h4 class="mb-0 fw-bold" style="font-size: clamp(1rem, 4vw, 1.25rem);">
+            <i class="fas fa-paper-plane me-2"></i>Send Message
+        </h4>
+        <small class="text-muted d-none d-sm-inline">Send WhatsApp messages to your contacts</small>
+    </div>
+</div>
+
+<form id="sendMessageForm">
+    <div class="row g-3">
+        <!-- Message Form Column -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-body p-3">
+                    <!-- Session Selection -->
+                    <div class="mb-3">
+                        <label class="form-label-compact">
+                            <i class="fab fa-whatsapp"></i> WhatsApp Session
+                        </label>
+                        <select class="form-control-compact" id="sessionSelect" required>
+                            <option value="">Loading sessions...</option>
+                        </select>
+                        <small class="form-text-compact">
+                            <i class="fas fa-info-circle"></i> Select a connected session to send from
+                        </small>
+                    </div>
+
+                    <!-- Recipient Phone -->
+                    <div class="mb-3">
+                        <label class="form-label-compact">
+                            <i class="fas fa-phone"></i> Recipient Phone Number
+                        </label>
+                        <input type="text" class="form-control-compact" id="recipientPhone" 
+                               placeholder="1234567890" required>
+                        <small class="form-text-compact">
+                            <i class="fas fa-info-circle"></i> Enter with country code (no + sign)
+                        </small>
+                    </div>
+
+                    <!-- Message Source -->
+                    <div class="mb-3">
+                        <label class="form-label-compact">
+                            <i class="fas fa-paper-plane"></i> Message Source
+                        </label>
+                        <select class="form-control-compact" id="messageSource">
+                            <option value="manual">✍️ Write Manually</option>
+                            <option value="template">📋 Use Template</option>
+                        </select>
+                    </div>
+
+                    <!-- Template Selector (Hidden by default) -->
+                    <div class="mb-3" id="templateSelectorSection" style="display: none;">
+                        <label class="form-label-compact">
+                            <i class="fas fa-file-alt"></i> Select Template
+                        </label>
+                        <select class="form-control-compact" id="templateSelect">
+                            <option value="">Loading templates...</option>
+                        </select>
+                        <small class="form-text-compact">
+                            <i class="fas fa-info-circle"></i> Choose a saved template to send
+                        </small>
+                    </div>
+
+                    <!-- Manual Message Section (Shown by default) -->
+                    <div id="manualMessageSection">
+                        <!-- Message Type -->
+                        <div class="mb-3">
+                            <label class="form-label-compact">
+                                <i class="fas fa-list"></i> Message Type
+                            </label>
+                            <select class="form-control-compact" id="messageType">
+                                <optgroup label="Basic Messages">
+                                    <option value="text">📝 Text Message</option>
+                                    <option value="media">📎 Media (Image/Video/Audio/Document)</option>
+                                </optgroup>
+                                <optgroup label="Special Messages">
+                                    <option value="sticker">🎨 Sticker (Auto-convert from image)</option>
+                                    <option value="location">📍 Location</option>
+                                    <option value="contact">👤 Contact (vCard)</option>
+                                    <option value="poll">📊 Poll</option>
+                                </optgroup>
+                                <optgroup label="Privacy">
+                                    <option value="viewOnceImage">👁️ View Once Image</option>
+                                    <option value="viewOnceVideo">👁️ View Once Video</option>
+                                    <option value="viewOnceAudio">👁️ View Once Audio</option>
+                                </optgroup>
+                                <optgroup label="Interactive">
+                                    <option value="buttons">🔘 Button Message</option>
+                                </optgroup>
+                            </select>
+                            <small class="form-text-compact" id="messageTypeHelp">
+                                <i class="fas fa-info-circle"></i> Select the type of message you want to send
+                            </small>
+                        </div>
+
+                        <!-- Dynamic Fields Container -->
+                        <div id="dynamicFields"></div>
+                    </div>
+                    
+                    <!-- Action Buttons (Mobile) -->
+                    <div class="d-lg-none mt-4">
+                        <button type="submit" class="btn btn-success w-100 btn-lg" style="min-height: 48px;">
+                            <i class="fas fa-paper-plane me-2"></i>Send Message
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Column -->
+        <div class="col-lg-5" id="previewColumn">
+            <div class="preview-sticky">
+                <!-- WhatsApp Preview -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-success text-white py-2 d-flex justify-content-between align-items-center">
+                        <small class="fw-semibold"><i class="fab fa-whatsapp me-2"></i>Preview</small>
+                        <button type="button" class="btn btn-sm btn-light d-lg-none" id="hidePreviewBtn" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="whatsapp-preview-compact">
+                        <div class="wa-message-bubble">
+                            <div id="previewContent" class="wa-message-text">
+                                <em class="text-muted">Your message will appear here...</em>
+                            </div>
+                            <div class="wa-message-time">
+                                <span id="currentTime"></span>
+                                <i class="fas fa-check-double"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons (Desktop Only) -->
+                <div class="d-none d-lg-flex gap-2">
+                    <a href="/dashboard" class="btn btn-light flex-grow-1">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success flex-grow-1">
+                        <i class="fas fa-paper-plane me-1"></i>Send Message
+                    </button>
+                </div>
+                
+                <!-- Back Button (Mobile Only) -->
+                <div class="d-lg-none">
+                    <button type="button" class="btn btn-outline-secondary w-100" id="backToFormBtn" style="min-height: 48px;">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Form
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Template Selector Modal -->
+<div class="modal fade" id="templateSelectorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content template-selector-modal">
+            <div class="modal-header border-0 pb-2">
+                <div>
+                    <h5 class="modal-title mb-1">
+                        <i class="fas fa-file-alt text-success me-2"></i>Choose Template
+                    </h5>
+                    <p class="text-muted small mb-0">Select a template to use in your message</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <div class="template-search-box mb-3">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" id="searchModalTemplates"
+                        placeholder="Search templates by name or content...">
+                </div>
+                <div id="modalTemplatesList" class="template-list">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-success" role="status"></div>
+                        <p class="text-muted mt-3 mb-0">Loading templates...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-2">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <a href="/templates" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Create New
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Preview Toggle Button (FAB) -->
+<button type="button" class="btn btn-success btn-fab d-lg-none" id="fabPreviewBtn">
+    <i class="fab fa-whatsapp"></i>
+</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="/js/send-message.js"></script>
+<script>
+    // Mobile preview toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const fabBtn = document.getElementById('fabPreviewBtn');
+        const hidePreviewBtn = document.getElementById('hidePreviewBtn');
+        const backToFormBtn = document.getElementById('backToFormBtn');
+        const previewCol = document.getElementById('previewColumn');
+        
+        if (previewCol) {
+            let isPreviewVisible = window.innerWidth >= 992;
+            
+            // Initially hide preview on mobile
+            if (window.innerWidth < 992) {
+                previewCol.style.display = 'none';
+            }
+            
+            function showPreview() {
+                isPreviewVisible = true;
+                previewCol.style.display = 'block';
+                if (fabBtn) fabBtn.style.display = 'none';
+                setTimeout(() => previewCol.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            }
+            
+            function hidePreview() {
+                isPreviewVisible = false;
+                previewCol.style.display = 'none';
+                if (fabBtn && window.innerWidth < 992) fabBtn.style.display = 'flex';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            // FAB button
+            if (fabBtn) fabBtn.addEventListener('click', showPreview);
+            
+            // Hide button in preview header
+            if (hidePreviewBtn) hidePreviewBtn.addEventListener('click', hidePreview);
+            
+            // Back to form button
+            if (backToFormBtn) backToFormBtn.addEventListener('click', hidePreview);
+            
+            // Handle resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 992) {
+                    previewCol.style.display = 'block';
+                    if (fabBtn) fabBtn.style.display = 'none';
+                    isPreviewVisible = true;
+                } else if (!isPreviewVisible) {
+                    previewCol.style.display = 'none';
+                    if (fabBtn) fabBtn.style.display = 'flex';
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,1288 @@
+<% currentPage = 'api-docs' %>
+
+<div class="api-docs-container">
+    <!-- Mobile Navigation Toggle -->
+    <button class="api-mobile-nav-toggle" id="apiNavToggle">
+        <i class="fas fa-bars"></i>
+        <span>Navigation</span>
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <aside class="api-sidebar" id="apiSidebar">
+        <div class="api-sidebar-header">
+            <h6><i class="fas fa-book me-2"></i>API Guide</h6>
+            <button class="api-sidebar-close" id="apiSidebarClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="api-sidebar-nav">
+            <li><a href="#getting-started" class="active"><i class="fas fa-rocket"></i>Getting Started</a></li>
+            <li><a href="#authentication"><i class="fas fa-key"></i>Authentication</a></li>
+        </ul>
+        <div class="api-sidebar-section">Session Management</div>
+        <ul class="api-sidebar-nav">
+            <li><a href="#get-sessions"><i class="fas fa-list"></i>Get Sessions</a></li>
+            <li><a href="#create-session"><i class="fas fa-plus-circle"></i>Create Session</a></li>
+            <li><a href="#get-session-status"><i class="fas fa-info-circle"></i>Get Session Status</a></li>
+            <li><a href="#get-qr-code"><i class="fas fa-qrcode"></i>Get QR Code</a></li>
+            <li><a href="#reconnect-session"><i class="fas fa-sync"></i>Reconnect Session</a></li>
+            <li><a href="#delete-session"><i class="fas fa-trash"></i>Delete Session</a></li>
+        </ul>
+        <div class="api-sidebar-section">Messaging</div>
+        <ul class="api-sidebar-nav">
+            <li><a href="#send-message"><i class="fas fa-paper-plane"></i>Send Message</a></li>
+            <li><a href="#send-media"><i class="fas fa-image"></i>Send Media</a></li>
+        </ul>
+        <div class="api-sidebar-section">Number Checker</div>
+        <ul class="api-sidebar-nav">
+            <li><a href="#check-numbers"><i class="fas fa-check-circle"></i>Check Numbers</a></li>
+        </ul>
+        <div class="api-sidebar-section">Resources</div>
+        <ul class="api-sidebar-nav">
+            <li><a href="#errors"><i class="fas fa-exclamation-triangle"></i>Error Codes</a></li>
+            <li><a href="#examples"><i class="fas fa-code"></i>Code Examples</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="api-content">
+        <!-- Page Header -->
+        <div class="api-page-header mb-4">
+            <div class="api-header-icon">
+                <i class="fas fa-code"></i>
+            </div>
+            <div>
+                <h1 class="api-docs-main-heading">API Documentation</h1>
+                <p class="api-docs-subtitle">
+                    Complete guide to integrate WhatsApp messaging into your applications
+                </p>
+            </div>
+        </div>
+
+        <!-- Getting Started -->
+        <section id="getting-started" class="api-section">
+
+            <!-- API Key Section - Clean Redesign -->
+            <% if (userApiKey) { %>
+            <div class="api-key-section">
+                <div class="api-key-header-clean">
+                    <div class="api-key-icon-clean">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div class="api-key-header-text">
+                        <h3>Your API Key</h3>
+                        <p>Use this key to authenticate your API requests</p>
+                    </div>
+                    <span class="api-key-badge-secure">
+                        <i class="fas fa-shield-alt"></i> Secure
+                    </span>
+                </div>
+                
+                <div class="api-key-body-clean">
+                    <div class="api-key-input-container">
+                        <code id="apiKeyDisplay" data-key="<%= userApiKey %>">••••••••••••••••••••••••••••••••</code>
+                        <div class="api-key-buttons">
+                            <button class="api-key-btn api-key-btn-toggle" onclick="toggleApiKeyVisibility()" title="Show/Hide" id="btnToggleKey">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="api-key-btn api-key-btn-copy" onclick="copyApiKey()" title="Copy">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="api-key-footer-clean">
+                        <button class="api-key-regenerate-btn" onclick="regenerateApiKey()">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Regenerate Key</span>
+                        </button>
+                        <div class="api-key-warning-clean">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Never share your API key publicly</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+            <h2>Base URL</h2>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <span class="code-block-title">API Base URL</span>
+                    <button class="copy-code-btn" onclick="copyCode(this)">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <code id="baseUrl"></code>
+            </div>
+
+            <div class="info-box info-box-info">
+                <strong><i class="fas fa-info-circle me-2"></i>Quick Start</strong><br>
+                All API requests require authentication. Include your API key in the <code>X-API-Key</code> header.
+            </div>
+        </section>
+
+        <!-- Authentication -->
+        <section id="authentication" class="api-section">
+            <h2>Authentication</h2>
+            <p>All API requests must be authenticated by including your API key in the request header:</p>
+            
+            <div class="code-block">
+                <div class="code-block-header">
+                    <span class="code-block-title">Required Header</span>
+                </div>
+                <code>X-API-Key: YOUR_API_KEY</code>
+            </div>
+
+            <div class="info-box info-box-warning">
+                <strong><i class="fas fa-exclamation-triangle me-2"></i>Security Requirements</strong><br>
+                • All API requests must use HTTPS/SSL encryption<br>
+                • Never expose your API key in client-side code or public repositories<br>
+                • Store API keys securely in environment variables
+            </div>
+        </section>
+
+        <!-- Get Sessions -->
+        <section id="get-sessions" class="api-section">
+            <h2><span class="method-badge-inline method-get">GET</span> Get Sessions</h2>
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <div class="endpoint-method-wrapper">
+                        <span class="endpoint-path"><span class="api-base"></span>/sessions</span>
+                    </div>
+                    <button class="copy-endpoint-btn" onclick="copyEndpoint(this)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="endpoint-description">Get session counts for your account</p>
+
+                <h4>Response</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">200 OK</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "success": true,
+  "counts": {
+    "total": 5,
+    "connected": 3,
+    "connecting": 1,
+    "qr": 1,
+    "disconnected": 0
+  }
+}</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Create Session -->
+        <section id="create-session" class="api-section">
+            <h2><span class="method-badge-inline method-post">POST</span> Create Session</h2>
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <div class="endpoint-method-wrapper">
+                        <span class="endpoint-path"><span class="api-base"></span>/sessions</span>
+                    </div>
+                    <button class="copy-endpoint-btn" onclick="copyEndpoint(this)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="endpoint-description">Create a new WhatsApp session</p>
+
+                <h4>Parameters</h4>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-label="Parameter"><span class="param-name">sessionName</span></td>
+                            <td data-label="Type">string</td>
+                            <td data-label="Required"><span class="param-required">Required</span></td>
+                            <td data-label="Description">Name for your session</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Request Body</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">JSON</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "sessionName": "My Business Account"
+}</code>
+                </div>
+
+                <h4>Response</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">201 Created</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "success": true,
+  "sessionId": "abc-123-def-456",
+  "message": "Session created successfully"
+}</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Get Session Status -->
+        <section id="get-session-status" class="api-section">
+            <h2><span class="method-badge-inline method-get">GET</span> Get Session Status</h2>
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <div class="endpoint-method-wrapper">
+                        <span class="endpoint-path"><span class="api-base"></span>/sessions/:sessionId</span>
+                    </div>
+                    <button class="copy-endpoint-btn" onclick="copyEndpoint(this)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="endpoint-description">Get detailed status of a specific session</p>
+
+                <h4>Response</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">200 OK</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "success": true,
+  "session": {
+    "id": "abc-123-def-456",
+    "name": "My Business Account",
+    "status": "connected",
+    "phone_number": "1234567890",
+    "created_at": "2024-01-01T00:00:00.000Z",
+    "isConnected": true
+  }
+}</code>
+                </div>
+
+                <div class="info-box info-box-info">
+                    <strong>Status Values:</strong><br>
+                    <code>connecting</code> • <code>qr</code> • <code>connected</code> • <code>disconnected</code>
+                </div>
+            </div>
+        </section>
+</code>
+   
+     <!-- Get QR Code -->
+        <section id="get-qr-code" class="api-section">
+            <h2><span class="method-badge-inline method-get">GET</span> Get QR Code</h2>
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <div class="endpoint-method-wrapper">
+                        <span class="endpoint-path"><span class="api-base"></span>/sessions/:sessionId/qr</span>
+                    </div>
+                    <button class="copy-endpoint-btn" onclick="copyEndpoint(this)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="endpoint-description">Get QR code for session authentication</p>
+
+                <h4>Response</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">200 OK</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "success": true,
+  "qrCode": "data:image/png;base64,iVBORw0KGgo..."
+}</code>
+                </div>
+
+                <div class="info-box info-box-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    The QR code is returned as a base64-encoded PNG image that can be displayed directly in an <code>&lt;img&gt;</code> tag.
+                </div>
+            </div>
+        </section>
+
+        <!-- Reconnect Session -->
+        <section id="reconnect-session" class="api-section">
+            <h2><span class="method-badge-inline method-post">POST</span> Reconnect Session</h2>
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <div class="endpoint-method-wrapper">
+                        <span class="endpoint-path"><span class="api-base"></span>/sessions/:sessionId/reconnect</span>
+                    </div>
+                    <button class="copy-endpoint-btn" onclick="copyEndpoint(this)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="endpoint-description">Reconnect a session (generates new QR code)</p>
+
+                <div class="info-box info-box-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will clear old credentials and require re-scanning the QR code.
+                </div>
+            </div>
+        </section>
+
+        <!-- Delete Session -->
+        <section id="delete-session" class="api-section">
+            <h2><span class="method-badge-inline method-delete">DELETE</span> Delete Session</h2>
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <div class="endpoint-method-wrapper">
+                        <span class="endpoint-path"><span class="api-base"></span>/sessions/:sessionId</span>
+                    </div>
+                    <button class="copy-endpoint-btn" onclick="copyEndpoint(this)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="endpoint-description">Permanently delete a session</p>
+
+                <div class="info-box info-box-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. All auto-replies and AI configurations will be deleted.
+                </div>
+            </div>
+        </section>
+
+        <!-- Send Message -->
+        <section id="send-message" class="api-section">
+            <h2><span class="method-badge-inline method-post">POST</span> Send Message</h2>
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <div class="endpoint-method-wrapper">
+                        <span class="endpoint-path"><span class="api-base"></span>/sessions/:sessionId/send</span>
+                    </div>
+                    <button class="copy-endpoint-btn" onclick="copyEndpoint(this)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="endpoint-description">Send a text message via WhatsApp</p>
+
+                <h4>Parameters</h4>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-label="Parameter"><span class="param-name">to</span></td>
+                            <td data-label="Type">string</td>
+                            <td data-label="Required"><span class="param-required">Required</span></td>
+                            <td data-label="Description">Phone number with country code (without +)</td>
+                        </tr>
+                        <tr>
+                            <td data-label="Parameter"><span class="param-name">message</span></td>
+                            <td data-label="Type">string</td>
+                            <td data-label="Required"><span class="param-required">Required</span></td>
+                            <td data-label="Description">Message text (max 4096 characters)</td>
+                        </tr>
+                        <tr>
+                            <td data-label="Parameter"><span class="param-name">skipValidation</span></td>
+                            <td data-label="Type">boolean</td>
+                            <td data-label="Required"><span class="param-optional">Optional</span></td>
+                            <td data-label="Description">Skip WhatsApp number validation (default: false)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box info-box-success">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    <strong>Smart Validation:</strong> By default, the API validates that the phone number is registered on WhatsApp before sending. This prevents wasted attempts and reduces spam risk. Set <code>skipValidation: true</code> to bypass this check.
+                </div>
+
+                <h4>Request Body</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">JSON (Basic)</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "to": "1234567890",
+  "message": "Hello from WhatsApp API!"
+}</code>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">JSON (Skip Validation)</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "to": "1234567890",
+  "message": "Hello from WhatsApp API!",
+  "skipValidation": true
+}</code>
+                </div>
+
+                <h4>Response</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">200 OK - Success</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "success": true,
+  "messageId": "3EB0C767D71D8D6E2CD5",
+  "message": "Message sent successfully"
+}</code>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">400 Bad Request - Invalid Number</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "success": false,
+  "error": "Invalid WhatsApp Number",
+  "message": "The phone number is not registered on WhatsApp. Please verify the number or use skipValidation: true to bypass this check.",
+  "phoneNumber": "1234567890"
+}</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Send Media -->
+        <section id="send-media" class="api-section">
+            <h2><span class="method-badge-inline method-post">POST</span> Send Media</h2>
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <div class="endpoint-method-wrapper">
+                        <span class="endpoint-path"><span class="api-base"></span>/sessions/:sessionId/send-media</span>
+                    </div>
+                    <button class="copy-endpoint-btn" onclick="copyEndpoint(this)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="endpoint-description">Send media files (images, videos, audio, documents)</p>
+
+                <h4>Parameters (multipart/form-data)</h4>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-label="Parameter"><span class="param-name">to</span></td>
+                            <td data-label="Type">string</td>
+                            <td data-label="Required"><span class="param-required">Required</span></td>
+                            <td data-label="Description">Phone number with country code</td>
+                        </tr>
+                        <tr>
+                            <td data-label="Parameter"><span class="param-name">media</span></td>
+                            <td data-label="Type">file</td>
+                            <td data-label="Required"><span class="param-required">Required</span></td>
+                            <td data-label="Description">File to send (max 50MB)</td>
+                        </tr>
+                        <tr>
+                            <td data-label="Parameter"><span class="param-name">message</span></td>
+                            <td data-label="Type">string</td>
+                            <td data-label="Required"><span class="param-optional">Optional</span></td>
+                            <td data-label="Description">Caption for the media</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Supported Media Types</h4>
+                <div class="media-types-grid">
+                    <div class="info-box info-box-info">
+                        <strong>Images</strong><br>
+                        .jpg, .jpeg, .png, .gif, .webp
+                    </div>
+                    <div class="info-box info-box-info">
+                        <strong>Videos</strong><br>
+                        .mp4, .avi, .mov, .mkv, .webm
+                    </div>
+                    <div class="info-box info-box-info">
+                        <strong>Audio</strong><br>
+                        .mp3, .wav, .ogg, .m4a, .aac
+                    </div>
+                    <div class="info-box info-box-info">
+                        <strong>Documents</strong><br>
+                        .pdf, .doc, .docx, .xls, .xlsx
+                    </div>
+                </div>
+
+                <h4>Example Request</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">cURL</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>curl -X POST <span class="api-base"></span>/api/sessions/abc-123/send-media \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -F "to=1234567890" \
+  -F "message=Check this out!" \
+  -F "media=@/path/to/image.jpg"</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Check Numbers -->
+        <section id="check-numbers" class="api-section">
+            <h2><span class="method-badge-inline method-post">POST</span> Check WhatsApp Numbers</h2>
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <div class="endpoint-method-wrapper">
+                        <span class="endpoint-path"><span class="api-base"></span>/number-checker/check</span>
+                    </div>
+                    <button class="copy-endpoint-btn" onclick="copyEndpoint(this)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="endpoint-description">Validate if phone numbers are registered on WhatsApp</p>
+
+                <h4>Parameters</h4>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-label="Parameter"><span class="param-name">sessionId</span></td>
+                            <td data-label="Type">string</td>
+                            <td data-label="Required"><span class="param-required">Required</span></td>
+                            <td data-label="Description">Session ID to use for checking</td>
+                        </tr>
+                        <tr>
+                            <td data-label="Parameter"><span class="param-name">phoneNumbers</span></td>
+                            <td data-label="Type">array</td>
+                            <td data-label="Required"><span class="param-required">Required</span></td>
+                            <td data-label="Description">Array of phone numbers with country code (max 100)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box info-box-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Batch Processing:</strong> You can check up to 100 phone numbers in a single request. The API will validate each number against WhatsApp's registry and return detailed results.
+                </div>
+
+                <h4>Request Body</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">JSON</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "sessionId": "abc-123-def-456",
+  "phoneNumbers": [
+    "1234567890",
+    "9876543210",
+    "5551234567"
+  ]
+}</code>
+                </div>
+
+                <h4>Response</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">200 OK - Success</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "success": true,
+  "message": "Number check completed",
+  "summary": {
+    "total": 3,
+    "valid": 2,
+    "invalid": 1
+  },
+  "results": [
+    {
+      "phoneNumber": "1234567890",
+      "isValid": true,
+      "status": "valid"
+    },
+    {
+      "phoneNumber": "9876543210",
+      "isValid": false,
+      "status": "invalid"
+    },
+    {
+      "phoneNumber": "5551234567",
+      "isValid": true,
+      "status": "valid"
+    }
+  ]
+}</code>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">403 Forbidden - Limit Reached</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>{
+  "success": false,
+  "error": "Number check limit reached",
+  "limit": 1000,
+  "used": 1000,
+  "remaining": 0,
+  "message": "You have reached your number check limit of 1000 contacts. You have already checked 1000 numbers. Please upgrade your plan to continue."
+}</code>
+                </div>
+
+                <h4>Example Request</h4>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">cURL</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>curl -X POST <span class="api-base"></span>/api/number-checker \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -d '{
+    "sessionId": "abc-123-def-456",
+    "phoneNumbers": ["1234567890", "9876543210"]
+  }'</code>
+                </div>
+
+                <div class="info-box info-box-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Rate Limits:</strong> Number checking counts against your monthly plan limit. Each phone number checked consumes one check from your quota. Check your plan details for your monthly limit.
+                </div>
+            </div>
+        </section>
+
+        <!-- Error Codes -->
+        <section id="errors" class="api-section">
+            <h2>Error Codes</h2>
+            <p>The API uses standard HTTP status codes to indicate success or failure:</p>
+
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Status Code</th>
+                        <th>Error</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Status Code"><code>200</code></td>
+                        <td data-label="Error">OK</td>
+                        <td data-label="Description">Request successful</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Status Code"><code>400</code></td>
+                        <td data-label="Error">Bad Request</td>
+                        <td data-label="Description">Missing or invalid parameters</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Status Code"><code>401</code></td>
+                        <td data-label="Error">Unauthorized</td>
+                        <td data-label="Description">Invalid or missing API key</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Status Code"><code>403</code></td>
+                        <td data-label="Error">Forbidden</td>
+                        <td data-label="Description">No access to this resource</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Status Code"><code>404</code></td>
+                        <td data-label="Error">Not Found</td>
+                        <td data-label="Description">Session or resource not found</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Status Code"><code>500</code></td>
+                        <td data-label="Error">Internal Server Error</td>
+                        <td data-label="Description">Server error occurred</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Error Response Format</h4>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <span class="code-block-title">JSON</span>
+                </div>
+                <code>{
+  "success": false,
+  "error": "Bad Request",
+  "message": "Phone number and message are required"
+}</code>
+            </div>
+        </section>
+
+        <!-- Code Examples -->
+        <section id="examples" class="api-section">
+            <h2>Code Examples</h2>
+            <p>Ready-to-use code snippets in popular programming languages:</p>
+
+            <div class="language-tabs">
+                <button class="language-tab active" onclick="switchTab('javascript')">JavaScript</button>
+                <button class="language-tab" onclick="switchTab('python')">Python</button>
+                <button class="language-tab" onclick="switchTab('php')">PHP</button>
+            </div>
+
+            <div id="javascript" class="tab-content active">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">Send Message - JavaScript/Node.js</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>const API_KEY = 'YOUR_API_KEY';
+const BASE_URL = '<span class="api-base"></span>';
+const SESSION_ID = 'your-session-id';
+
+async function sendMessage(to, message) {
+  const response = await fetch(`${BASE_URL}/api/sessions/${SESSION_ID}/send`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY
+    },
+    body: JSON.stringify({ to, message })
+  });
+  
+  const data = await response.json();
+  return data;
+}
+
+sendMessage('1234567890', 'Hello from JavaScript!');</code>
+                </div>
+            </div>
+
+            <div id="python" class="tab-content">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">Send Message - Python</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>import requests
+
+API_KEY = 'YOUR_API_KEY'
+BASE_URL = '<span class="api-base"></span>'
+SESSION_ID = 'your-session-id'
+
+def send_message(to, message):
+    url = f'{BASE_URL}/api/sessions/{SESSION_ID}/send'
+    headers = {
+        'Content-Type': 'application/json',
+        'X-API-Key': API_KEY
+    }
+    data = {'to': to, 'message': message}
+    
+    response = requests.post(url, json=data, headers=headers)
+    print(response.json())
+
+send_message('1234567890', 'Hello from Python!')</code>
+                </div>
+            </div>
+
+            <div id="php" class="tab-content">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">Send Message - PHP</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>&lt;?php
+$apiKey = 'YOUR_API_KEY';
+$baseUrl = '<span class="api-base"></span>';
+$sessionId = 'your-session-id';
+
+function sendMessage($to, $message) {
+    global $apiKey, $baseUrl, $sessionId;
+    
+    $url = "$baseUrl/api/sessions/$sessionId/send";
+    $data = json_encode(['to' => $to, 'message' => $message]);
+    
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        "X-API-Key: $apiKey"
+    ]);
+    
+    $response = curl_exec($ch);
+    curl_close($ch);
+    return json_decode($response, true);
+}
+
+$result = sendMessage('1234567890', 'Hello from PHP!');
+print_r($result);
+?&gt;</code>
+                </div>
+            </div>
+
+            <h3 class="mt-5">Check WhatsApp Numbers</h3>
+            <p>Validate multiple phone numbers in a single request:</p>
+
+            <div id="javascript-check" class="tab-content active">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">Check Numbers - JavaScript/Node.js</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>const API_KEY = 'YOUR_API_KEY';
+const BASE_URL = '<span class="api-base"></span>';
+const SESSION_ID = 'your-session-id';
+
+async function checkNumbers(phoneNumbers) {
+  const response = await fetch(`${BASE_URL}/api/number-checker`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY
+    },
+    body: JSON.stringify({ 
+      sessionId: SESSION_ID, 
+      phoneNumbers 
+    })
+  });
+  
+  const data = await response.json();
+  return data;
+}
+
+// Check multiple numbers
+const numbers = ['1234567890', '9876543210', '5551234567'];
+checkNumbers(numbers).then(result => {
+  console.log(`Valid: ${result.summary.valid}, Invalid: ${result.summary.invalid}`);
+  result.results.forEach(r => {
+    console.log(`${r.phoneNumber}: ${r.status}`);
+  });
+});</code>
+                </div>
+            </div>
+
+            <div id="python-check" class="tab-content">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">Check Numbers - Python</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>import requests
+
+API_KEY = 'YOUR_API_KEY'
+BASE_URL = '<span class="api-base"></span>'
+SESSION_ID = 'your-session-id'
+
+def check_numbers(phone_numbers):
+    url = f'{BASE_URL}/api/number-checker'
+    headers = {
+        'Content-Type': 'application/json',
+        'X-API-Key': API_KEY
+    }
+    data = {
+        'sessionId': SESSION_ID,
+        'phoneNumbers': phone_numbers
+    }
+    
+    response = requests.post(url, json=data, headers=headers)
+    result = response.json()
+    
+    print(f"Valid: {result['summary']['valid']}, Invalid: {result['summary']['invalid']}")
+    for r in result['results']:
+        print(f"{r['phoneNumber']}: {r['status']}")
+    
+    return result
+
+# Check multiple numbers
+numbers = ['1234567890', '9876543210', '5551234567']
+check_numbers(numbers)</code>
+                </div>
+            </div>
+
+            <div id="php-check" class="tab-content">
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">Check Numbers - PHP</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <code>&lt;?php
+$apiKey = 'YOUR_API_KEY';
+$baseUrl = '<span class="api-base"></span>';
+$sessionId = 'your-session-id';
+
+function checkNumbers($phoneNumbers) {
+    global $apiKey, $baseUrl, $sessionId;
+    
+    $url = "$baseUrl/api/number-checker";
+    $data = json_encode([
+        'sessionId' => $sessionId,
+        'phoneNumbers' => $phoneNumbers
+    ]);
+    
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        "X-API-Key: $apiKey"
+    ]);
+    
+    $response = curl_exec($ch);
+    curl_close($ch);
+    $result = json_decode($response, true);
+    
+    echo "Valid: {$result['summary']['valid']}, Invalid: {$result['summary']['invalid']}\n";
+    foreach ($result['results'] as $r) {
+        echo "{$r['phoneNumber']}: {$r['status']}\n";
+    }
+    
+    return $result;
+}
+
+// Check multiple numbers
+$numbers = ['1234567890', '9876543210', '5551234567'];
+$result = checkNumbers($numbers);
+?&gt;</code>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+// Get CSRF token from meta tag
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : null;
+}
+
+// Helper function to make authenticated requests
+async function fetchWithCsrf(url, options = {}) {
+    const csrfToken = getCsrfToken();
+    const headers = options.headers || {};
+    
+    if (csrfToken && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method?.toUpperCase())) {
+        headers['x-csrf-token'] = csrfToken;
+    }
+    
+    return fetch(url, {
+        ...options,
+        headers
+    });
+}
+
+// Set dynamic base URL
+document.addEventListener('DOMContentLoaded', function() {
+    const baseUrl = window.location.origin + '/api';
+    const baseUrlElement = document.getElementById('baseUrl');
+    if (baseUrlElement) {
+        baseUrlElement.textContent = baseUrl;
+    }
+    document.querySelectorAll('.api-base').forEach(el => {
+        el.textContent = baseUrl;
+    });
+
+    // Mobile Navigation
+    const apiNavToggle = document.getElementById('apiNavToggle');
+    const apiSidebar = document.getElementById('apiSidebar');
+    const apiSidebarClose = document.getElementById('apiSidebarClose');
+    let sidebarOverlay = document.querySelector('.api-sidebar-overlay');
+    
+    if (!sidebarOverlay) {
+        sidebarOverlay = document.createElement('div');
+        sidebarOverlay.className = 'api-sidebar-overlay';
+        document.body.appendChild(sidebarOverlay);
+    }
+
+    function openSidebar() {
+        apiSidebar.classList.add('active');
+        sidebarOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+        apiSidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    if (apiNavToggle) {
+        apiNavToggle.addEventListener('click', openSidebar);
+    }
+
+    if (apiSidebarClose) {
+        apiSidebarClose.addEventListener('click', closeSidebar);
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeSidebar);
+    }
+
+    // Smooth scroll for sidebar links
+    document.querySelectorAll('.api-sidebar-nav a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            
+            if (targetElement) {
+                // Close mobile sidebar
+                if (window.innerWidth <= 992) {
+                    closeSidebar();
+                }
+                
+                // Smooth scroll
+                setTimeout(() => {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, window.innerWidth <= 992 ? 300 : 0);
+                
+                // Update active state
+                document.querySelectorAll('.api-sidebar-nav a').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            }
+        });
+    });
+
+    // Intersection Observer for active section
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                document.querySelectorAll('.api-sidebar-nav a').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { threshold: 0.5, rootMargin: '-100px 0px -50% 0px' });
+
+    document.querySelectorAll('.api-section').forEach(section => {
+        observer.observe(section);
+    });
+
+    // Close sidebar on window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 992) {
+            closeSidebar();
+        }
+    });
+});
+
+function toggleApiKeyVisibility() {
+    const keyDisplay = document.getElementById('apiKeyDisplay');
+    const toggleBtn = document.getElementById('btnToggleKey');
+    if (!keyDisplay || !toggleBtn) return;
+    
+    const actualKey = keyDisplay.getAttribute('data-key');
+    const isHidden = keyDisplay.textContent.includes('••');
+    
+    if (isHidden) {
+        keyDisplay.textContent = actualKey;
+        toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        toggleBtn.title = 'Hide API Key';
+    } else {
+        keyDisplay.textContent = '••••••••••••••••••••••••••••••••';
+        toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+        toggleBtn.title = 'Show API Key';
+    }
+}
+
+function copyApiKey() {
+    const keyDisplay = document.getElementById('apiKeyDisplay');
+    if (!keyDisplay) return;
+    
+    const actualKey = keyDisplay.getAttribute('data-key');
+    navigator.clipboard.writeText(actualKey).then(() => {
+        if (typeof Toast !== 'undefined') {
+            Toast.success('API key copied!');
+        } else {
+            alert('API key copied to clipboard!');
+        }
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        if (typeof Toast !== 'undefined') {
+            Toast.error('Failed to copy API key');
+        }
+    });
+}
+
+async function regenerateApiKey() {
+    const confirmMessage = 'This will invalidate your current API key. Any applications using the old key will stop working immediately.\n\nAre you sure you want to continue?';
+    
+    if (typeof ConfirmModal !== 'undefined') {
+        ConfirmModal.show({
+            title: 'Regenerate API Key?',
+            message: 'This will invalidate your current API key. Any applications using the old key will stop working immediately.<br><br><strong>Are you sure you want to continue?</strong>',
+            confirmText: 'Regenerate Key',
+            cancelText: 'Cancel',
+            type: 'warning',
+            icon: 'fa-exclamation-triangle',
+            confirmIcon: 'fa-sync-alt',
+            onConfirm: async () => {
+                await performRegenerate();
+            }
+        });
+    } else {
+        if (confirm(confirmMessage)) {
+            await performRegenerate();
+        }
+    }
+}
+
+async function performRegenerate() {
+    try {
+        const response = await fetchWithCsrf('/webapi/users/<%= user.id %>/regenerate-api-key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            const apiKeyDisplay = document.getElementById('apiKeyDisplay');
+            if (apiKeyDisplay) {
+                // Update the data-key attribute with the new key
+                apiKeyDisplay.setAttribute('data-key', data.api_key);
+                // Show the new key immediately
+                apiKeyDisplay.textContent = data.api_key;
+                // Update the toggle button to show "hide" icon
+                const toggleBtn = document.getElementById('btnToggleKey');
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    toggleBtn.title = 'Hide API Key';
+                }
+            }
+            if (typeof Toast !== 'undefined') {
+                Toast.success('API key regenerated successfully!');
+            } else {
+                alert('API key regenerated successfully!');
+            }
+        } else {
+            if (typeof Toast !== 'undefined') {
+                Toast.error(data.message || 'Failed to regenerate API key');
+            } else {
+                alert(data.message || 'Failed to regenerate API key');
+            }
+        }
+    } catch (error) {
+        console.error('Error regenerating API key:', error);
+        if (typeof Toast !== 'undefined') {
+            Toast.error('Error regenerating API key');
+        } else {
+            alert('Error regenerating API key. Please try again.');
+        }
+    }
+}
+
+function copyCode(button) {
+    const codeBlock = button.closest('.code-block');
+    if (!codeBlock) return;
+    
+    const codeElement = codeBlock.querySelector('code');
+    if (!codeElement) return;
+    
+    const code = codeElement.textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        button.style.background = 'rgba(16, 185, 129, 0.2)';
+        button.style.color = '#10b981';
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.style.background = '';
+            button.style.color = '';
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy code:', err);
+        if (typeof Toast !== 'undefined') {
+            Toast.error('Failed to copy code');
+        }
+    });
+}
+
+function switchTab(language) {
+    document.querySelectorAll('.language-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById(language).classList.add('active');
+}
+
+function copyEndpoint(button) {
+    const endpointPath = button.previousElementSibling;
+    if (!endpointPath) return;
+    
+    const fullEndpoint = endpointPath.textContent.trim();
+    navigator.clipboard.writeText(fullEndpoint).then(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.style.background = 'var(--whatsapp-green)';
+        button.style.color = 'white';
+        button.style.borderColor = 'var(--whatsapp-green)';
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.style.background = '';
+            button.style.color = '';
+            button.style.borderColor = '';
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy endpoint:', err);
+        if (typeof Toast !== 'undefined') {
+            Toast.error('Failed to copy endpoint');
+        }
+    });
+}
+</script>

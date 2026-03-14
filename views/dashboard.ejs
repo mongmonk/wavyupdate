@@ -1,0 +1,420 @@
+<% currentPage='dashboard' %>
+
+    <!-- Page Header -->
+    <!-- Page Header -->
+    <div class="dashboard-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-1 fw-bold">Welcome back, <%= user.fullname || user.username %>! 👋</h2>
+                <p class="text-muted mb-0">
+                    Manage your WhatsApp sessions from here
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <button class="btn btn-success btn-lg shadow-sm w-100 w-md-auto" data-bs-toggle="modal"
+                    data-bs-target="#createSessionModal">
+                    <i class="fas fa-plus me-2"></i>Create Session
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Total Sessions</div>
+                            <div class="stats-value fw-bold text-primary" id="totalSessions">0</div>
+                        </div>
+                        <div class="stats-icon-bg bg-primary-subtle text-primary rounded-3 p-2">
+                            <i class="fas fa-mobile-alt fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Connected</div>
+                            <div class="stats-value fw-bold text-success" id="connectedSessions">0</div>
+                        </div>
+                        <div class="stats-icon-bg bg-success-subtle text-success rounded-3 p-2">
+                            <i class="fas fa-check-circle fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Connecting</div>
+                            <div class="stats-value fw-bold text-warning" id="connectingSessions">0</div>
+                        </div>
+                        <div class="stats-icon-bg bg-warning-subtle text-warning rounded-3 p-2">
+                            <i class="fas fa-spinner fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stats-label text-muted mb-1">Disconnected</div>
+                            <div class="stats-value fw-bold text-danger" id="disconnectedSessions">0</div>
+                        </div>
+                        <div class="stats-icon-bg bg-danger-subtle text-danger rounded-3 p-2">
+                            <i class="fas fa-times-circle fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sessions Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fab fa-whatsapp me-2 whatsapp-icon-color"></i>
+                WhatsApp Sessions
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <!-- Desktop Table View -->
+            <div class="table-responsive d-none d-md-block">
+                <table class="table mb-0" id="sessionsTable">
+                    <thead>
+                        <tr>
+                            <th>Session ID</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Phone Number</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Loading sessions...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div id="sessionsMobileList" class="d-md-none p-3">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading sessions...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Create Session Modal - Modern Redesign -->
+    <div class="modal fade" id="createSessionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-session">
+            <div class="modal-content modal-session-content">
+                <!-- Modern Header with Gradient -->
+                <div class="modal-session-header">
+                    <div class="session-header-bg"></div>
+                    <button type="button" class="btn-close-modern" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="session-header-content">
+                        <div class="session-icon-modern">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <h3 class="session-title-modern">New WhatsApp Session</h3>
+                        <p class="session-desc-modern">Connect your WhatsApp account to start messaging</p>
+                    </div>
+                </div>
+
+                <form id="createSessionForm">
+                    <div class="modal-session-body">
+                        <!-- Floating Label Input -->
+                        <div class="input-float-group">
+                            <input type="text" class="input-float" id="sessionName" name="sessionName" placeholder=" "
+                                required autofocus>
+                            <label for="sessionName" class="input-float-label">
+                                <i class="fas fa-signature"></i>
+                                Session Name
+                            </label>
+                            <div class="input-float-border"></div>
+                        </div>
+
+                        <!-- Info Card -->
+                        <div class="session-info-card">
+                            <div class="info-card-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="info-card-content">
+                                <h6 class="info-card-title">What's Next?</h6>
+                                <p class="info-card-text">After creating the session, you'll scan a QR code with your
+                                    WhatsApp mobile app to complete the connection.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-session-footer">
+                        <button type="button" class="btn-modern btn-secondary-modern" data-bs-dismiss="modal">
+                            <i class="fas fa-times-circle"></i>
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-modern btn-primary-modern">
+                            <i class="fas fa-plus-circle"></i>
+                            Create Session
+                            <div class="btn-shine"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setSessionName(name) {
+            document.getElementById('sessionName').value = name;
+            document.getElementById('sessionName').focus();
+        }
+    </script>
+
+    <!-- QR Code Modal - Compact Redesign -->
+    <div class="modal fade" id="qrModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-qr">
+            <div class="modal-content modal-qr-content">
+                <div class="modal-qr-header">
+                    <button type="button" class="btn-close-modern" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="qr-header-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h4 class="qr-title">Scan QR Code</h4>
+                    <p class="qr-subtitle">QR code refreshes automatically every 20 seconds</p>
+                </div>
+                <div class="modal-qr-body">
+                    <div id="qrCodeContainer" class="qr-container">
+                        <div class="qr-loading">
+                            <div class="spinner-border text-success mb-3"></div>
+                            <p class="text-muted mb-1">Generating QR Code...</p>
+                            <small class="text-muted">Attempt 1 of 10</small>
+                        </div>
+                    </div>
+                    <div class="qr-help-compact">
+                        <div class="qr-help-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="qr-help-text">
+                            <strong>How to scan:</strong>
+                            <p>Open WhatsApp → Settings → Linked Devices → Link a Device</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Message Modal -->
+    <!-- Send Message Modal - Compact Redesign -->
+    <div class="modal fade" id="sendMessageModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-message">
+            <div class="modal-content modal-message-content">
+                <div class="modal-message-header">
+                    <button type="button" class="btn-close-modern" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="message-header-icon">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <h4 class="message-title">Send Message</h4>
+                    <p class="message-subtitle">Send a WhatsApp message</p>
+                </div>
+                <form id="sendMessageForm">
+                    <div class="modal-message-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="recipientPhone" class="form-label-compact">
+                                    <i class="fas fa-phone"></i> Phone Number
+                                </label>
+                                <input type="text" class="form-control-compact" id="recipientPhone"
+                                    placeholder="1234567890" required>
+                                <small class="form-text-compact">
+                                    <i class="fas fa-info-circle"></i> With country code (no +)
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="messageType" class="form-label-compact">
+                                    <i class="fas fa-list"></i> Message Type
+                                </label>
+                                <select class="form-control-compact" id="messageType">
+                                    <option value="text">📝 Text Message</option>
+                                    <option value="media">📎 Media Message</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group-compact">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="messageText" class="form-label-compact mb-0">
+                                    <i class="fas fa-comment"></i> Message
+                                    <span class="text-muted message-optional-label" id="messageOptionalLabel"
+                                        style="font-size: 0.7rem;">(Optional for media)</span>
+                                </label>
+                                <button type="button" class="btn btn-sm btn-outline-success"
+                                    style="font-size: 0.7rem; padding: 0.25rem 0.5rem;"
+                                    onclick="showTemplateSelector()">
+                                    <i class="fas fa-file-alt"></i> Template
+                                </button>
+                            </div>
+                            <textarea class="form-control-compact" id="messageText" rows="3"
+                                placeholder="Type your message..." required></textarea>
+                        </div>
+                        <div class="form-group-compact media-upload-section" id="mediaUploadSection"
+                            style="display: none;">
+                            <label for="mediaFile" class="form-label-compact">
+                                <i class="fas fa-file"></i> Media File
+                            </label>
+                            <input type="file" class="form-control-compact" id="mediaFile"
+                                accept="image/*,video/*,audio/*,.pdf,.doc,.docx">
+                            <small class="form-text-compact">
+                                <i class="fas fa-info-circle"></i> Images, Videos, Audio, PDF (max 50MB)
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-message-footer">
+                        <button type="button" class="btn-modern btn-secondary-modern" data-bs-dismiss="modal">
+                            <i class="fas fa-times-circle"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn-modern btn-primary-modern">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                            <div class="btn-shine"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Template Selector Modal -->
+    <div class="modal fade" id="templateSelectorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content template-selector-modal">
+                <div class="modal-header border-0 pb-2">
+                    <div>
+                        <h5 class="modal-title mb-1">
+                            <i class="fas fa-file-alt text-success me-2"></i>Choose Template
+                        </h5>
+                        <p class="text-muted small mb-0">Select a template to use in your message</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <div class="template-search-box mb-3">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="form-control" id="searchModalTemplates"
+                            placeholder="Search templates by name or content...">
+                    </div>
+                    <div id="modalTemplatesList" class="template-list">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-success" role="status"></div>
+                            <p class="text-muted mt-3 mb-0">Loading templates...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-2">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <a href="/templates" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Create New
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Webhook Settings Modal -->
+    <div class="modal fade" id="webhookModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
+                <div class="modal-header border-0 text-white" style="background-color: #0c8a7b;">
+                    <h5 class="modal-title mb-0 d-flex align-items-center" style="font-weight: 600; font-size: 1.1rem;">
+                        <i class="fas fa-link" style="margin-right: 12px; opacity: 0.9;"></i> Webhook Settings
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="opacity: 0.8; font-size: 0.8rem;"></button>
+                </div>
+                <form id="webhookForm">
+                    <div class="modal-body p-4 pt-4">
+                        <div class="mb-4">
+                            <label for="webhookUrl" class="form-label fw-bold mb-2" style="font-size: 0.9rem; color: #333;">Webhook URL</label>
+                            <div class="input-group" style="box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden;">
+                                <span class="input-group-text bg-white border-end-0 border" style="color: #0c8a7b; border-color: #e5e7eb!important;">
+                                    <i class="fas fa-globe"></i>
+                                </span>
+                                <input type="url" class="form-control border-start-0 border ps-0" id="webhookUrl" name="webhookUrl" placeholder="https://your-server.com/webhook" style="border-color: #e5e7eb!important; padding-top: 10px; padding-bottom: 10px;">
+                            </div>
+                            <small class="form-text text-muted mt-2 d-block" style="font-size: 0.8rem;">
+                                <i class="fas fa-info-circle text-secondary me-1"></i> Incoming messages will be POSTed to this URL as JSON.
+                            </small>
+                        </div>
+                        
+                        <div class="card border border-light rounded-3 mb-4" style="box-shadow: 0 1px 3px rgba(0,0,0,0.02)">
+                            <div class="card-body d-flex justify-content-between align-items-center p-3">
+                                <div>
+                                    <h6 class="mb-1 fw-bold" style="color: #333; font-size: 0.95rem;">Enable Webhook</h6>
+                                    <p class="mb-0 text-muted" style="font-size: 0.85rem;">Activate message forwarding</p>
+                                </div>
+                                <div class="form-check form-switch fs-4 mb-0">
+                                    <input class="form-check-input" type="checkbox" id="webhookEnabled" name="webhookEnabled" style="cursor: pointer;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card border-0 rounded-3" style="background-color: #f3f0ff;">
+                            <div class="card-body p-3">
+                                <div class="d-flex">
+                                    <div class="me-3 mt-1">
+                                        <i class="fas fa-lightbulb" style="color: #6366f1;"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold" style="color: #4f46e5; font-size: 0.9rem;">Testing Tip</h6>
+                                        <p class="mb-0 text-muted" style="font-size: 0.85rem; color: #6b7280!important;">You can use <a href="https://webhook.site" target="_blank" style="color: #4f46e5; font-weight: 500; text-decoration: none;">webhook.site</a> to capture and inspect requests in real-time.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-1 justify-content-center gap-3">
+                        <button type="button" class="btn text-dark fw-bold" data-bs-dismiss="modal" style="font-size: 0.95rem;">Cancel</button>
+                        <button type="submit" class="btn text-white px-4 fw-bold d-flex align-items-center" style="background-color: #0c8a7b; border-radius: 8px; padding-top: 10px; padding-bottom: 10px; font-size: 0.95rem;">
+                            <i class="fas fa-save me-2"></i> Save Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/dashboard.js"></script>

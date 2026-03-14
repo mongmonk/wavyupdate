@@ -1,0 +1,208 @@
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/settings">Settings</a></li>
+                    <li class="breadcrumb-item active">Authentication</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-shield-alt text-primary me-2"></i>Authentication Settings
+            </h1>
+            <p class="text-muted">Configure OAuth providers and authentication methods</p>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <% if (typeof session !== 'undefined' && session.message) { %>
+        <div class="alert alert-<%= session.message.type %> alert-dismissible fade show" role="alert">
+            <%= session.message.text %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% delete session.message; %>
+    <% } %>
+
+    <div class="row">
+        <!-- Google OAuth Settings -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fab fa-google fa-2x text-danger me-3"></i>
+                        <div>
+                            <h5 class="card-title mb-0">Google OAuth 2.0</h5>
+                            <small class="text-muted">Allow users to sign in with their Google account</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/settings/authentication">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        
+                        <!-- Enable/Disable Toggle -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="googleAuthEnabled" 
+                                       name="googleAuthEnabled" <%= settings.googleAuthEnabled ? 'checked' : '' %>>
+                                <label class="form-check-label" for="googleAuthEnabled">
+                                    <strong>Enable Google Authentication</strong>
+                                </label>
+                            </div>
+                            <small class="text-muted">
+                                When enabled, users can sign in using their Google account
+                            </small>
+                        </div>
+
+                        <hr>
+
+                        <!-- Google Client ID -->
+                        <div class="mb-3">
+                            <label for="googleClientId" class="form-label">
+                                <i class="fas fa-key me-1"></i>Google Client ID
+                            </label>
+                            <input type="text" class="form-control" id="googleClientId" 
+                                   name="googleClientId" 
+                                   value="<%= settings.googleClientId %>"
+                                   placeholder="Enter your Google OAuth Client ID">
+                            <div class="form-text">
+                                Get this from <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a>
+                            </div>
+                        </div>
+
+                        <!-- Google Client Secret -->
+                        <div class="mb-3">
+                            <label for="googleClientSecret" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Google Client Secret
+                            </label>
+                            <input type="password" class="form-control" id="googleClientSecret" 
+                                   name="googleClientSecret" 
+                                   placeholder="<%= settings.hasGoogleSecret ? '••••••••••••••••' : 'Enter your Google OAuth Client Secret' %>">
+                            <div class="form-text">
+                                Leave blank to keep existing secret. Get this from Google Cloud Console.
+                            </div>
+                        </div>
+
+                        <!-- Callback URL (Read-only, auto-generated) -->
+                        <div class="mb-4">
+                            <label for="googleCallbackUrl" class="form-label">
+                                <i class="fas fa-link me-1"></i>Authorized Redirect URI
+                                <span class="badge bg-info ms-2">Auto-generated</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control bg-light" id="googleCallbackUrl" 
+                                       value="<%= settings.googleCallbackUrl %>"
+                                       readonly>
+                                <button class="btn btn-outline-secondary" type="button" onclick="copyCallbackUrl(this)">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                This URL is automatically generated from your APP_URL (<code><%= settings.appUrl %></code>). 
+                                Copy and add it to "Authorized redirect URIs" in Google Cloud Console.
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Settings
+                            </button>
+                            <a href="/settings" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Setup Guide -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-book me-2"></i>Setup Guide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold">How to set up Google OAuth:</h6>
+                    <ol class="small">
+                        <li class="mb-2">
+                            Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>
+                        </li>
+                        <li class="mb-2">
+                            Create a new project or select existing one
+                        </li>
+                        <li class="mb-2">
+                            Enable "Google+ API" in APIs & Services
+                        </li>
+                        <li class="mb-2">
+                            Go to "Credentials" and create OAuth 2.0 Client ID
+                        </li>
+                        <li class="mb-2">
+                            Choose "Web application" as application type
+                        </li>
+                        <li class="mb-2">
+                            Add your callback URL to "Authorized redirect URIs"
+                        </li>
+                        <li class="mb-2">
+                            Copy Client ID and Client Secret
+                        </li>
+                        <li class="mb-2">
+                            Paste them in the form and enable Google Auth
+                        </li>
+                        <li class="mb-2">
+                            <strong>Restart the server</strong> for changes to take effect
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="small mb-0">
+                        <li class="mb-2">
+                            Keep your Client Secret secure and never share it
+                        </li>
+                        <li class="mb-2">
+                            Make sure the callback URL matches exactly in Google Console
+                        </li>
+                        <li class="mb-2">
+                            Changes apply immediately, no restart required
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyCallbackUrl(btn) {
+    const input = document.getElementById('googleCallbackUrl');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    
+    navigator.clipboard.writeText(input.value).then(() => {
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    }).catch(err => {
+        alert('Failed to copy: ' + err);
+    });
+}
+</script>

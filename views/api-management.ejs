@@ -1,0 +1,213 @@
+<% currentPage = 'api-management' %>
+
+<div class="api-management-container">
+    <!-- Page Header -->
+    <div class="api-page-header mb-4">
+        <div class="api-header-icon">
+            <i class="fas fa-key"></i>
+        </div>
+        <div>
+            <h1 class="api-docs-main-heading">API Management</h1>
+            <p class="api-docs-subtitle">Manage your API credentials and access</p>
+        </div>
+    </div>
+
+    <!-- API Key Section -->
+    <div class="api-key-section mb-4">
+        <div class="api-key-header-clean">
+            <div class="api-key-icon-clean">
+                <i class="fas fa-key"></i>
+            </div>
+            <div class="api-key-header-text">
+                <h3>Your API Key</h3>
+                <p>Use this key to authenticate your API requests</p>
+            </div>
+            <span class="api-key-badge-secure">
+                <i class="fas fa-shield-alt"></i> Active
+            </span>
+        </div>
+        
+        <div class="api-key-body-clean">
+            <div class="api-key-input-container">
+                <code id="apiKeyText">Loading...</code>
+                <div class="api-key-buttons">
+                    <button class="api-key-btn api-key-btn-toggle" onclick="toggleKey()" title="Show/Hide" id="btnToggle">
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+                    </button>
+                    <button class="api-key-btn api-key-btn-copy" onclick="copyKey()" title="Copy">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="api-key-footer-clean">
+                <button class="api-key-regenerate-btn" onclick="regenKey()">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Regenerate Key</span>
+                </button>
+                <div class="api-key-warning-clean">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Never share your API key publicly</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Start Guide -->
+    <div class="card mb-4">
+        <div class="card-header" style="background: linear-gradient(135deg, rgba(0, 168, 132, 0.05), rgba(0, 128, 105, 0.05)); border-bottom: 1px solid rgba(0, 168, 132, 0.1);">
+            <h5 class="mb-0"><i class="fas fa-rocket me-2" style="color: var(--whatsapp-green);"></i>Quick Start</h5>
+        </div>
+        <div class="card-body">
+            <h6 class="mb-2">Authentication Header</h6>
+            <div class="code-block mb-3">
+                <div class="code-block-header">
+                    <span class="code-block-title">Required Header</span>
+                </div>
+                <code>X-API-Key: YOUR_API_KEY</code>
+            </div>
+
+            <h6 class="mb-2">Example: Send Message</h6>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <span class="code-block-title">POST Request</span>
+                </div>
+                <code>POST /api/sessions/:sessionId/send
+{
+  "to": "1234567890",
+  "message": "Hello from API!"
+}</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Endpoints -->
+    <div class="card">
+        <div class="card-header" style="background: linear-gradient(135deg, rgba(0, 168, 132, 0.05), rgba(0, 128, 105, 0.05)); border-bottom: 1px solid rgba(0, 168, 132, 0.1);">
+            <div class="d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="fas fa-plug me-2" style="color: var(--whatsapp-green);"></i>Available Endpoints</h5>
+                <a href="/api-docs" class="btn btn-sm" style="background: var(--whatsapp-green); color: white;">
+                    <i class="fas fa-book me-1"></i> Full Documentation
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="endpoint-list">
+                <div class="endpoint-item-simple">
+                    <span class="method-badge-simple method-post">POST</span>
+                    <code class="endpoint-path-simple">/api/sessions/:sessionId/send</code>
+                    <span class="endpoint-desc-simple">Send text message</span>
+                </div>
+                <div class="endpoint-item-simple">
+                    <span class="method-badge-simple method-post">POST</span>
+                    <code class="endpoint-path-simple">/api/sessions/:sessionId/send-media</code>
+                    <span class="endpoint-desc-simple">Send media files</span>
+                </div>
+                <div class="endpoint-item-simple">
+                    <span class="method-badge-simple method-get">GET</span>
+                    <code class="endpoint-path-simple">/api/sessions</code>
+                    <span class="endpoint-desc-simple">Get all sessions</span>
+                </div>
+                <div class="endpoint-item-simple">
+                    <span class="method-badge-simple method-get">GET</span>
+                    <code class="endpoint-path-simple">/api/sessions/:sessionId</code>
+                    <span class="endpoint-desc-simple">Get session status</span>
+                </div>
+                <div class="endpoint-item-simple">
+                    <span class="method-badge-simple method-post">POST</span>
+                    <code class="endpoint-path-simple">/api/sessions</code>
+                    <span class="endpoint-desc-simple">Create new session</span>
+                </div>
+                <div class="endpoint-item-simple">
+                    <span class="method-badge-simple method-delete">DELETE</span>
+                    <code class="endpoint-path-simple">/api/sessions/:sessionId</code>
+                    <span class="endpoint-desc-simple">Delete session</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let apiKey = '';
+let visible = false;
+
+document.addEventListener('DOMContentLoaded', loadKey);
+
+async function loadKey() {
+    try {
+        const res = await fetch('/webapi/user/api-key');
+        const data = await res.json();
+        if (data.success) {
+            apiKey = data.apiKey;
+            showMasked();
+        }
+    } catch (e) {
+        document.getElementById('apiKeyText').textContent = 'Error';
+    }
+}
+
+function showMasked() {
+    document.getElementById('apiKeyText').textContent = '••••••••••••••••••••••••••••••••';
+}
+
+function showKey() {
+    document.getElementById('apiKeyText').textContent = apiKey;
+}
+
+function toggleKey() {
+    visible = !visible;
+    if (visible) {
+        showKey();
+        document.getElementById('eyeIcon').className = 'fas fa-eye-slash';
+        document.getElementById('toggleText').textContent = 'Hide';
+    } else {
+        showMasked();
+        document.getElementById('eyeIcon').className = 'fas fa-eye';
+        document.getElementById('toggleText').textContent = 'Show';
+    }
+}
+
+async function copyKey() {
+    try {
+        await navigator.clipboard.writeText(apiKey);
+        Toast.success('Copied!');
+    } catch (e) {
+        Toast.error('Failed');
+    }
+}
+
+function regenKey() {
+    ConfirmModal.show({
+        title: 'Regenerate API Key?',
+        message: 'This will invalidate your current API key. Any applications using the old key will stop working immediately.<br><br><strong>Are you sure you want to continue?</strong>',
+        confirmText: 'Regenerate Key',
+        cancelText: 'Cancel',
+        type: 'warning',
+        icon: 'fa-exclamation-triangle',
+        confirmIcon: 'fa-sync-alt',
+        onConfirm: async () => {
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+                const res = await fetch('/webapi/users/<%= user.id %>/regenerate-api-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    apiKey = data.api_key;
+                    visible = true;
+                    showKey();
+                    document.getElementById('eyeIcon').className = 'fas fa-eye-slash';
+                    Toast.success('API key regenerated successfully!');
+                } else {
+                    Toast.error(data.message || 'Failed to regenerate API key');
+                }
+            } catch (e) {
+                console.error('Error regenerating API key:', e);
+                Toast.error('Error regenerating API key');
+            }
+        }
+    });
+}
+</script>

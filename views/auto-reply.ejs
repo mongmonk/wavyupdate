@@ -1,0 +1,439 @@
+<!-- Page Header - Modern Dashboard Style -->
+<div class="auto-reply-page-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <a href="/dashboard" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 class="mb-1 fw-bold"><i class="fas fa-robot me-2"></i>Auto-Reply</h2>
+                    <p class="text-muted mb-0">Configure automatic responses for <%= session.name %></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+                <button class="btn btn-primary btn-lg shadow-sm flex-grow-1 flex-md-grow-0" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#importAutoReplyModal"
+                        style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none;">
+                    <i class="fas fa-download me-2"></i>Import
+                </button>
+                <a href="/sessions/<%= session.id %>/auto-reply/create" 
+                   class="btn btn-success btn-lg shadow-sm flex-grow-1 flex-md-grow-0">
+                    <i class="fas fa-plus me-2"></i>Add Rule
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards - Modern Design (2 per row on mobile) -->
+<div class="row g-3 mb-4">
+    <!-- Session Card -->
+    <div class="col-6 col-lg-3">
+        <div class="auto-reply-stat-card <%= session.status === 'connected' ? 'stat-success' : 'stat-danger' %>">
+            <div class="stat-icon">
+                <i class="fas fa-<%= session.status === 'connected' ? 'wifi' : 'unlink' %>"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Session</div>
+                <div class="stat-value"><%= session.status === 'connected' ? 'Connected' : 'Offline' %></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Phone Card -->
+    <div class="col-6 col-lg-3">
+        <div class="auto-reply-stat-card stat-primary">
+            <div class="stat-icon">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">WhatsApp</div>
+                <div class="stat-value" style="font-size: 1.1rem;"><%= session.phone_number || 'N/A' %></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total Rules Card -->
+    <div class="col-6 col-lg-3">
+        <div class="auto-reply-stat-card stat-info">
+            <div class="stat-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Total Rules</div>
+                <div class="stat-value" id="statTotalRules">
+                    <div class="spinner-border spinner-border-sm"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Rules Card -->
+    <div class="col-6 col-lg-3">
+        <div class="auto-reply-stat-card stat-success">
+            <div class="stat-icon">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Active Now</div>
+                <div class="stat-value" id="statActiveRules">
+                    <div class="spinner-border spinner-border-sm"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Info Alert -->
+<% if (session.status !== 'connected') { %>
+<div class="alert alert-warning shadow-sm mb-4">
+    <i class="fas fa-exclamation-triangle"></i>
+    <div>
+        <strong>Session Not Connected</strong>
+        <small>Auto-replies will only work when your WhatsApp session is connected. Please connect your session first.</small>
+    </div>
+</div>
+<% } %>
+
+<!-- Auto-Replies List -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-robot me-2 text-success"></i>Auto-Reply Rules</h5>
+    </div>
+    <div class="card-body p-0">
+        <!-- Desktop Table View -->
+        <div class="table-responsive d-none d-lg-block">
+            <table class="table mb-0" id="autoRepliesTable">
+                <thead>
+                    <tr>
+                        <th>Trigger</th>
+                        <th>Reply</th>
+                        <th>Options</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3 text-muted">Loading auto-replies...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div id="autoRepliesMobileList" class="d-lg-none p-3">
+            <div class="text-center py-5">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Loading auto-replies...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Auto-Reply Modal - Compact & Responsive -->
+<div class="modal fade" id="createAutoReplyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered ar-modal-dialog">
+        <div class="modal-content ar-modal-content">
+            <!-- Compact Header -->
+            <div class="ar-modal-header">
+                <div class="ar-header-icon">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="ar-header-text">
+                    <h5 class="ar-modal-title">Add Auto-Reply Rule</h5>
+                    <p class="ar-modal-subtitle">Configure automatic response</p>
+                </div>
+                <button type="button" class="ar-close-btn" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="createAutoReplyForm">
+                <div class="ar-modal-body">
+                    <!-- Trigger Section - Compact -->
+                    <div class="ar-section">
+                        <div class="ar-section-label">
+                            <i class="fas fa-bullseye"></i>
+                            <span>Trigger</span>
+                        </div>
+                        <div class="ar-trigger-row">
+                            <select class="ar-select" id="triggerType" name="triggerType" required>
+                                <option value="exact" selected>🎯 Exact</option>
+                                <option value="contains">🔍 Contains</option>
+                                <option value="starts_with">▶️ Starts</option>
+                                <option value="ends_with">⏹️ Ends</option>
+                                <option value="regex">⚙️ Regex</option>
+                            </select>
+                            <input type="text" class="ar-input" id="triggerValue" name="triggerValue" 
+                                   placeholder="e.g., hello, hi" required>
+                        </div>
+                        <div class="ar-help-text" id="triggerHelp">
+                            <i class="fas fa-info-circle"></i>
+                            Message must match exactly
+                        </div>
+                    </div>
+
+                    <!-- Reply Messages Section - Compact -->
+                    <div class="ar-section">
+                        <div class="ar-section-label">
+                            <i class="fas fa-reply"></i>
+                            <span>Reply Messages</span>
+                        </div>
+                        
+                        <div id="replyMessagesContainer" class="ar-messages-container">
+                            <!-- Messages will be added here -->
+                        </div>
+                        
+                        <div class="ar-add-btns">
+                            <button type="button" class="ar-add-btn ar-add-text" onclick="addTextMessage()">
+                                <i class="fas fa-comment"></i> Text
+                            </button>
+                            <button type="button" class="ar-add-btn ar-add-media" onclick="addMediaMessage()">
+                                <i class="fas fa-image"></i> Media
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Options Section - Compact Inline -->
+                    <div class="ar-options">
+                        <div class="ar-option-item">
+                            <div class="ar-option-info">
+                                <i class="fas fa-power-off text-success"></i>
+                                <span>Active</span>
+                            </div>
+                            <label class="ar-switch">
+                                <input type="checkbox" id="isActive" name="isActive" checked>
+                                <span class="ar-slider"></span>
+                            </label>
+                        </div>
+                        <div class="ar-option-divider"></div>
+                        <div class="ar-option-item">
+                            <div class="ar-option-info">
+                                <i class="fas fa-user text-info"></i>
+                                <span>Reply to Self</span>
+                            </div>
+                            <label class="ar-switch">
+                                <input type="checkbox" id="replyToSelf" name="replyToSelf">
+                                <span class="ar-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Compact Footer -->
+                <div class="ar-modal-footer">
+                    <button type="button" class="ar-btn ar-btn-cancel" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="ar-btn ar-btn-create">
+                        <i class="fas fa-plus"></i> Create Rule
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Share Auto-Reply Modal -->
+<div class="modal fade" id="shareAutoReplyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered share-import-dialog">
+        <div class="modal-content si-modal">
+            <div class="si-header si-header-green">
+                <div class="si-icon"><i class="fas fa-share-alt"></i></div>
+                <div class="si-title">Share Rule</div>
+                <button type="button" class="si-close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="si-body">
+                <div class="si-code-display" id="shareCodeDisplay">Loading...</div>
+                <button type="button" class="si-btn si-btn-green" id="copyShareBtn" onclick="copyShareCode()">
+                    <i class="fas fa-copy me-1"></i>Copy Code
+                </button>
+                <div class="si-footer-info">
+                    <span><i class="fas fa-check-circle text-success"></i> Unique code</span>
+                    <span><i class="fas fa-clock text-primary"></i> Never expires</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Auto-Reply Modal -->
+<div class="modal fade" id="importAutoReplyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered share-import-dialog">
+        <div class="modal-content si-modal">
+            <div class="si-header si-header-blue">
+                <div class="si-icon"><i class="fas fa-file-import"></i></div>
+                <div class="si-title">Import Rule</div>
+                <button type="button" class="si-close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="importAutoReplyForm">
+                <div class="si-body">
+                    <div class="si-input-wrap">
+                        <input type="text" 
+                               class="si-input" 
+                               id="importShareCode" 
+                               name="shareCode" 
+                               placeholder="XXXXXXXXXXXX"
+                               maxlength="12"
+                               autocomplete="off"
+                               required>
+                        <span class="si-char-count"><span id="charCount">0</span>/12</span>
+                    </div>
+                    <button type="button" class="si-paste-btn" onclick="quickPasteCode()">
+                        <i class="fas fa-clipboard"></i> Paste from clipboard
+                    </button>
+                    
+                    <!-- Custom Trigger Value (Optional) -->
+                    <div id="customTriggerSection" style="display: none; margin-top: 15px;">
+                        <div class="alert alert-warning py-2 px-3 mb-2" style="font-size: 0.85rem;">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Duplicate trigger detected!</strong>
+                            <div id="duplicateMessage" style="margin-top: 5px;"></div>
+                        </div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">
+                            <i class="fas fa-edit"></i> New Trigger Value:
+                        </label>
+                        <input type="text" 
+                               class="si-input" 
+                               id="customTriggerValue" 
+                               name="customTriggerValue" 
+                               placeholder="Enter a different trigger value"
+                               style="margin-bottom: 10px;">
+                        <small style="display: block; color: #6c757d; font-size: 0.8rem;">
+                            <i class="fas fa-info-circle"></i> Leave empty to use original trigger
+                        </small>
+                    </div>
+                    
+                    <div class="si-dest">
+                        <span class="si-dest-label">Import to:</span>
+                        <span class="si-dest-value"><%= session.name %></span>
+                    </div>
+                    <div class="si-actions">
+                        <button type="button" class="si-btn si-btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="si-btn si-btn-blue">
+                            <i class="fas fa-download me-1"></i>Import
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Auto-Reply Modal - Compact & Responsive -->
+<div class="modal fade" id="editAutoReplyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered ar-modal-dialog">
+        <div class="modal-content ar-modal-content">
+            <!-- Compact Header -->
+            <div class="ar-modal-header" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                <div class="ar-header-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="ar-header-text">
+                    <h5 class="ar-modal-title">Edit Auto-Reply Rule</h5>
+                    <p class="ar-modal-subtitle">Update your auto-reply settings</p>
+                </div>
+                <button type="button" class="ar-close-btn" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="editAutoReplyForm">
+                <input type="hidden" id="editAutoReplyId" name="id">
+                <div class="ar-modal-body">
+                    <!-- Trigger Section - Compact -->
+                    <div class="ar-section">
+                        <div class="ar-section-label">
+                            <i class="fas fa-bullseye"></i>
+                            <span>Trigger</span>
+                        </div>
+                        <div class="ar-trigger-row">
+                            <select class="ar-select" id="editTriggerType" name="triggerType" required>
+                                <option value="exact">🎯 Exact</option>
+                                <option value="contains">🔍 Contains</option>
+                                <option value="starts_with">▶️ Starts</option>
+                                <option value="ends_with">⏹️ Ends</option>
+                                <option value="regex">⚙️ Regex</option>
+                            </select>
+                            <input type="text" class="ar-input" id="editTriggerValue" name="triggerValue" 
+                                   placeholder="e.g., hello, hi" required>
+                        </div>
+                    </div>
+
+                    <!-- Reply Messages Section - Compact -->
+                    <div class="ar-section">
+                        <div class="ar-section-label">
+                            <i class="fas fa-reply"></i>
+                            <span>Reply Messages</span>
+                        </div>
+                        
+                        <div id="editReplyMessagesContainer" class="ar-messages-container">
+                            <!-- Messages will be added here -->
+                        </div>
+                        
+                        <div class="ar-add-btns">
+                            <button type="button" class="ar-add-btn ar-add-text" onclick="addEditTextMessage()">
+                                <i class="fas fa-comment"></i> Text
+                            </button>
+                            <button type="button" class="ar-add-btn ar-add-media" onclick="addEditMediaMessage()">
+                                <i class="fas fa-image"></i> Media
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Options Section - Compact Inline -->
+                    <div class="ar-options">
+                        <div class="ar-option-item">
+                            <div class="ar-option-info">
+                                <i class="fas fa-power-off text-success"></i>
+                                <span>Active</span>
+                            </div>
+                            <label class="ar-switch">
+                                <input type="checkbox" id="editIsActive" name="isActive">
+                                <span class="ar-slider"></span>
+                            </label>
+                        </div>
+                        <div class="ar-option-divider"></div>
+                        <div class="ar-option-item">
+                            <div class="ar-option-info">
+                                <i class="fas fa-user text-info"></i>
+                                <span>Reply to Self</span>
+                            </div>
+                            <label class="ar-switch">
+                                <input type="checkbox" id="editReplyToSelf" name="replyToSelf">
+                                <span class="ar-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Compact Footer -->
+                <div class="ar-modal-footer">
+                    <button type="button" class="ar-btn ar-btn-cancel" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="ar-btn ar-btn-create" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Pass session ID to JavaScript
+    window.sessionId = '<%= session.id %>';
+</script>
+<script src="/js/auto-reply.js"></script>

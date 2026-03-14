@@ -1,0 +1,183 @@
+<% currentPage = 'templates' %>
+
+<!-- Page Header - Modern Dashboard Style -->
+<div class="templates-page-header mb-4">
+    <div class="row align-items-center g-3">
+        <div class="col-12 col-md-6">
+            <h2 class="mb-1 fw-bold"><i class="fas fa-file-alt me-2"></i>Templates</h2>
+            <p class="text-muted mb-0">Create and manage message templates</p>
+        </div>
+        <div class="col-12 col-md-6 text-md-end">
+            <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">
+                <a href="/templates/create" class="btn btn-success btn-lg shadow-sm text-start">
+                    <i class="fas fa-plus me-3"></i>New Template
+                </a>
+                <button class="btn btn-danger btn-lg shadow-sm text-start" id="btnDeleteAll" style="display: none;">
+                    <i class="fas fa-trash me-4"></i>Delete All
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card border-0 shadow-sm h-100">
+            <div class="card-body p-3 p-lg-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-label text-muted mb-1">Total Templates</div>
+                        <div class="stats-value fw-bold text-primary" id="statTotal">0</div>
+                    </div>
+                    <div class="stats-icon-bg bg-primary-subtle text-primary rounded-3 p-2">
+                        <i class="fas fa-file-alt fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card border-0 shadow-sm h-100">
+            <div class="card-body p-3 p-lg-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-label text-muted mb-1">Favorites</div>
+                        <div class="stats-value fw-bold text-warning" id="statFavorites">0</div>
+                    </div>
+                    <div class="stats-icon-bg bg-warning-subtle text-warning rounded-3 p-2">
+                        <i class="fas fa-star fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card border-0 shadow-sm h-100">
+            <div class="card-body p-3 p-lg-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-label text-muted mb-1">With Media</div>
+                        <div class="stats-value fw-bold text-success" id="statMedia">0</div>
+                    </div>
+                    <div class="stats-icon-bg bg-success-subtle text-success rounded-3 p-2">
+                        <i class="fas fa-image fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card border-0 shadow-sm h-100">
+            <div class="card-body p-3 p-lg-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-label text-muted mb-1">Total Uses</div>
+                        <div class="stats-value fw-bold text-info" id="statUsage">0</div>
+                    </div>
+                    <div class="stats-icon-bg bg-info-subtle text-info rounded-3 p-2">
+                        <i class="fas fa-chart-line fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter Bar -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body p-2 p-md-3">
+        <!-- Mobile Filter Toggle -->
+        <button class="filter-collapse-toggle" id="filterToggle" type="button">
+            <div class="toggle-content">
+                <div class="toggle-left">
+                    <i class="fas fa-filter"></i>
+                    <span>Filters</span>
+                    <span class="filter-count" id="activeFilterCount">0</span>
+                </div>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </button>
+        
+        <div class="filter-content-collapsible show" id="filterContent">
+            <div class="d-flex flex-column flex-md-row gap-2 align-items-stretch align-items-md-center">
+                <div class="search-box-compact flex-grow-1">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchTemplates" placeholder="Search templates...">
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <select class="filter-select-compact" id="filterType">
+                        <option value="">All Types</option>
+                        <optgroup label="Basic">
+                            <option value="text">📝 Text</option>
+                            <option value="image">🖼️ Image</option>
+                            <option value="video">🎬 Video</option>
+                            <option value="audio">🎵 Audio</option>
+                            <option value="document">📄 Document</option>
+                        </optgroup>
+                        <optgroup label="Special">
+                            <option value="sticker">🎨 Sticker</option>
+                            <option value="location">📍 Location</option>
+                            <option value="contact">👤 Contact</option>
+                            <option value="poll">📊 Poll</option>
+                        </optgroup>
+                        <optgroup label="Privacy">
+                            <option value="viewOnceImage">👁️ View Once Image</option>
+                            <option value="viewOnceVideo">👁️ View Once Video</option>
+                            <option value="viewOnceAudio">👁️ View Once Audio</option>
+                        </optgroup>
+                    </select>
+                    <select class="filter-select-compact" id="sortBy">
+                        <option value="name">Sort: Name</option>
+                        <option value="recent">Sort: Recent</option>
+                        <option value="usage">Sort: Most Used</option>
+                    </select>
+                    <button class="btn-filter-compact" id="btnFavorites" onclick="toggleFavoritesOnly()" title="Show Favorites">
+                        <i class="fas fa-star text-warning"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Templates Grid -->
+<div id="templatesContainer" class="row g-3">
+    <div class="col-12 text-center py-5">
+        <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-3">Loading templates...</p>
+    </div>
+</div>
+
+
+
+<script src="/js/templates.js"></script>
+<script>
+    // Mobile filter toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        var filterToggle = document.getElementById('filterToggle');
+        var filterContent = document.getElementById('filterContent');
+        
+        if (filterToggle && filterContent) {
+            // Check screen size and set initial state
+            function checkScreenSize() {
+                if (window.innerWidth <= 576) {
+                    filterContent.classList.remove('show');
+                } else {
+                    filterContent.classList.add('show');
+                }
+            }
+            
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+            
+            filterToggle.addEventListener('click', function() {
+                filterContent.classList.toggle('show');
+                this.querySelector('.fa-chevron-down').style.transform = 
+                    filterContent.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0)';
+            });
+        }
+    });
+</script>

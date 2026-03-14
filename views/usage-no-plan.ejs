@@ -1,0 +1,115 @@
+<% currentPage = 'usage' %>
+
+<!-- Page Header -->
+<div class="mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h2 class="mb-1 fw-bold"><i class="fas fa-chart-line me-2"></i>Usage & Limits</h2>
+            <p class="text-muted mb-0">Track your resource consumption and plan limits</p>
+        </div>
+    </div>
+</div>
+
+<!-- No Plan Card -->
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body p-4 p-md-5">
+                <!-- Icon -->
+                <div class="mb-4">
+                    <div class="stats-icon-bg bg-warning-subtle text-warning rounded-circle d-inline-flex align-items-center justify-content-center p-4">
+                        <i class="fas fa-box-open fa-3x"></i>
+                    </div>
+                </div>
+                
+                <!-- Title -->
+                <h3 class="fw-bold mb-3">No Plan Assigned</h3>
+                
+                <!-- Description -->
+                <p class="text-muted mb-4">
+                    You don't have an active plan yet. Contact your administrator to get a plan assigned to your account.
+                </p>
+                
+                <!-- Info Alert -->
+                <div class="alert alert-info border-0 mb-4">
+                    <div class="d-flex align-items-start text-start">
+                        <i class="fas fa-info-circle me-3 mt-1"></i>
+                        <div>
+                            <h6 class="alert-heading mb-2">What does this mean?</h6>
+                            <p class="mb-0 small">
+                                Your account is currently inactive. You won't be able to use features until an administrator assigns you a plan.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mb-4">
+                    <a href="/pricing" class="btn btn-success">
+                        <i class="fas fa-rocket me-2"></i>View Plans
+                    </a>
+                    <% if (user.is_admin) { %>
+                    <a href="/admin/assign-plans" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Assign Plans
+                    </a>
+                    <% } %>
+                </div>
+                
+                <!-- Help Text -->
+                <p class="text-muted small mb-0">
+                    <i class="fas fa-question-circle me-1"></i>
+                    Need help? Contact your system administrator.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Restricted Features -->
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-lock me-2"></i>Currently Restricted Features
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-times-circle text-danger me-2"></i>
+                            <span class="small">Messages</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-times-circle text-danger me-2"></i>
+                            <span class="small">Sessions</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-times-circle text-danger me-2"></i>
+                            <span class="small">Contacts</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-times-circle text-danger me-2"></i>
+                            <span class="small">Templates</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-times-circle text-danger me-2"></i>
+                            <span class="small">Number Checker</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-times-circle text-danger me-2"></i>
+                            <span class="small">API Access</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

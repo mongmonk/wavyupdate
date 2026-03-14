@@ -1,0 +1,380 @@
+<% currentPage = 'campaigns' %>
+
+<!-- Page Header - Modern Dashboard Style -->
+<div class="campaigns-page-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h2 class="mb-1 fw-bold"><i class="fas fa-bullhorn me-2"></i>Campaigns</h2>
+            <p class="text-muted mb-0">Manage and send bulk messages to your contacts</p>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <a href="/campaigns/create" class="btn btn-success btn-lg shadow-sm w-100 w-md-auto">
+                <i class="fas fa-plus me-2"></i>New Campaign
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card border-0 shadow-sm h-100">
+            <div class="card-body p-3 p-lg-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-label text-muted mb-1">Total Campaigns</div>
+                        <div class="stats-value fw-bold text-primary"><%= campaigns.length %></div>
+                    </div>
+                    <div class="stats-icon-bg bg-primary-subtle text-primary rounded-3 p-2">
+                        <i class="fas fa-bullhorn fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card border-0 shadow-sm h-100">
+            <div class="card-body p-3 p-lg-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-label text-muted mb-1">Completed</div>
+                        <div class="stats-value fw-bold text-success"><%= campaigns.filter(c => c.status === 'completed').length %></div>
+                    </div>
+                    <div class="stats-icon-bg bg-success-subtle text-success rounded-3 p-2">
+                        <i class="fas fa-check-circle fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card border-0 shadow-sm h-100">
+            <div class="card-body p-3 p-lg-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-label text-muted mb-1">Running</div>
+                        <div class="stats-value fw-bold text-warning"><%= campaigns.filter(c => c.status === 'running').length %></div>
+                    </div>
+                    <div class="stats-icon-bg bg-warning-subtle text-warning rounded-3 p-2">
+                        <i class="fas fa-spinner fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stats-card border-0 shadow-sm h-100">
+            <div class="card-body p-3 p-lg-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stats-label text-muted mb-1">Pending</div>
+                        <div class="stats-value fw-bold text-info"><%= campaigns.filter(c => c.status === 'pending').length %></div>
+                    </div>
+                    <div class="stats-icon-bg bg-info-subtle text-info rounded-3 p-2">
+                        <i class="fas fa-clock fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Campaigns List -->
+<% if (campaigns.length === 0) { %>
+    <div class="card shadow-sm">
+        <div class="card-body p-5 text-center">
+            <div class="empty-state-modern">
+                <div class="empty-icon-modern">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <h3 class="mt-4 mb-2">No campaigns yet</h3>
+                <p class="text-muted mb-4">Create your first campaign to send bulk messages to your contacts</p>
+                <a href="/campaigns/create" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Create First Campaign
+                </a>
+            </div>
+        </div>
+    </div>
+<% } else { %>
+    <!-- Desktop Table View -->
+    <div class="card shadow-sm d-none d-lg-block">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Campaigns</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Campaign Name</th>
+                            <th>Sessions</th>
+                            <th>Method</th>
+                            <th>Contacts</th>
+                            <th>Status</th>
+                            <th>Progress</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% campaigns.forEach(campaign => { 
+                            const totalContacts = campaign.contacts.length;
+                            const sentCount = campaign.sent_count || 0;
+                            const failedCount = campaign.failed_count || 0;
+                            const processedCount = sentCount + failedCount;
+                            const remainingCount = totalContacts - processedCount;
+                            const progressPercent = totalContacts > 0 ? Math.round((processedCount / totalContacts) * 100) : 0;
+                            const sentWidth = totalContacts > 0 ? (sentCount / totalContacts * 100) : 0;
+                            const failedWidth = totalContacts > 0 ? (failedCount / totalContacts * 100) : 0;
+                        %>
+                            <tr class="fade-in-up">
+                                <td>
+                                    <strong><%= campaign.name %></strong>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fab fa-whatsapp text-success"></i>
+                                        <span><%= campaign.session_ids.length %></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info"><%= campaign.method.toUpperCase() %></span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-users me-1"></i><%= campaign.contacts.length %>
+                                </td>
+                                <td>
+                                    <% if (campaign.status === 'completed') { %>
+                                        <span class="badge bg-success">Completed</span>
+                                    <% } else if (campaign.status === 'running') { %>
+                                        <span class="badge bg-warning">Running</span>
+                                    <% } else if (campaign.status === 'pending') { %>
+                                        <span class="badge bg-info">Pending</span>
+                                    <% } else if (campaign.status === 'paused') { %>
+                                        <span class="badge bg-secondary">Paused</span>
+                                    <% } else if (campaign.status === 'failed') { %>
+                                        <span class="badge bg-danger">Failed</span>
+                                    <% } %>
+                                </td>
+                                <td style="min-width: 180px;">
+                                    <div class="progress mb-1" style="height: 8px;">
+                                        <div class="progress-bar bg-success" 
+                                             data-width="<%= sentWidth.toFixed(1) %>"
+                                             title="<%= sentCount %> sent"></div>
+                                        <div class="progress-bar bg-danger" 
+                                             data-width="<%= failedWidth.toFixed(1) %>"
+                                             title="<%= failedCount %> failed"></div>
+                                    </div>
+                                    <small class="text-muted">
+                                        <%= processedCount %>/<%= totalContacts %> (<%= progressPercent %>%)
+                                    </small>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        <%= new Date(campaign.created_at).toLocaleDateString() %>
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <% if (campaign.status === 'pending') { %>
+                                            <button class="btn btn-sm btn-success btn-start-campaign" 
+                                                    data-campaign-id="<%= campaign.id %>"
+                                                    data-campaign-name="<%= campaign.name %>"
+                                                    title="Start">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                        <% } else if (campaign.status === 'running') { %>
+                                            <button class="btn btn-sm btn-warning btn-pause-campaign" 
+                                                    data-campaign-id="<%= campaign.id %>"
+                                                    data-campaign-name="<%= campaign.name %>"
+                                                    title="Pause">
+                                                <i class="fas fa-pause"></i>
+                                            </button>
+                                        <% } else if (campaign.status === 'paused') { %>
+                                            <button class="btn btn-sm btn-success btn-resume-campaign" 
+                                                    data-campaign-id="<%= campaign.id %>"
+                                                    data-campaign-name="<%= campaign.name %>"
+                                                    title="Resume">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                        <% } %>
+                                        <a href="/campaigns/<%= campaign.id %>" class="btn btn-sm btn-info" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-danger btn-delete-campaign" 
+                                                data-campaign-id="<%= campaign.id %>"
+                                                data-campaign-name="<%= campaign.name %>"
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="d-lg-none">
+        <% campaigns.forEach(campaign => { 
+            const totalContacts = campaign.contacts.length;
+            const sentCount = campaign.sent_count || 0;
+            const failedCount = campaign.failed_count || 0;
+            const processedCount = sentCount + failedCount;
+            const remainingCount = totalContacts - processedCount;
+            const progressPercent = totalContacts > 0 ? Math.round((processedCount / totalContacts) * 100) : 0;
+            const sentWidth = totalContacts > 0 ? (sentCount / totalContacts * 100) : 0;
+            const failedWidth = totalContacts > 0 ? (failedCount / totalContacts * 100) : 0;
+        %>
+            <div class="campaign-card-mobile mb-3 fade-in-up">
+                <div class="campaign-card-header-mobile">
+                    <div class="campaign-info-mobile">
+                        <h6 class="campaign-name-mobile mb-1"><%= campaign.name %></h6>
+                        <div class="campaign-meta-mobile">
+                            <span><i class="fab fa-whatsapp text-success"></i> <%= campaign.session_ids.length %></span>
+                            <span><i class="fas fa-users"></i> <%= campaign.contacts.length %></span>
+                            <span class="badge bg-info"><%= campaign.method.toUpperCase() %></span>
+                        </div>
+                    </div>
+                    <% if (campaign.status === 'completed') { %>
+                        <span class="badge bg-success">Completed</span>
+                    <% } else if (campaign.status === 'running') { %>
+                        <span class="badge bg-warning">Running</span>
+                    <% } else if (campaign.status === 'pending') { %>
+                        <span class="badge bg-info">Pending</span>
+                    <% } else if (campaign.status === 'paused') { %>
+                        <span class="badge bg-secondary">Paused</span>
+                    <% } else if (campaign.status === 'failed') { %>
+                        <span class="badge bg-danger">Failed</span>
+                    <% } %>
+                </div>
+                
+                <div class="campaign-progress-mobile">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">Progress</small>
+                        <small class="fw-bold"><%= progressPercent %>%</small>
+                    </div>
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar bg-success" 
+                             data-width="<%= sentWidth.toFixed(1) %>"
+                             title="<%= sentCount %> sent"></div>
+                        <div class="progress-bar bg-danger" 
+                             data-width="<%= failedWidth.toFixed(1) %>"
+                             title="<%= failedCount %> failed"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-success"><i class="fas fa-check"></i> <%= sentCount %> sent</small>
+                        <% if (failedCount > 0) { %>
+                            <small class="text-danger"><i class="fas fa-times"></i> <%= failedCount %> failed</small>
+                        <% } %>
+                        <% if (remainingCount > 0) { %>
+                            <small class="text-warning"><i class="fas fa-clock"></i> <%= remainingCount %> left</small>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="campaign-footer-mobile">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> <%= new Date(campaign.created_at).toLocaleDateString() %>
+                    </small>
+                    <div class="campaign-actions-mobile">
+                        <% if (campaign.status === 'pending') { %>
+                            <button class="btn btn-sm btn-success btn-start-campaign" 
+                                    data-campaign-id="<%= campaign.id %>"
+                                    data-campaign-name="<%= campaign.name %>">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        <% } else if (campaign.status === 'running') { %>
+                            <button class="btn btn-sm btn-warning btn-pause-campaign" 
+                                    data-campaign-id="<%= campaign.id %>"
+                                    data-campaign-name="<%= campaign.name %>">
+                                <i class="fas fa-pause"></i>
+                            </button>
+                        <% } else if (campaign.status === 'paused') { %>
+                            <button class="btn btn-sm btn-success btn-resume-campaign" 
+                                    data-campaign-id="<%= campaign.id %>"
+                                    data-campaign-name="<%= campaign.name %>">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        <% } %>
+                        <a href="/campaigns/<%= campaign.id %>" class="btn btn-sm btn-info">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <button class="btn btn-sm btn-danger btn-delete-campaign" 
+                                data-campaign-id="<%= campaign.id %>"
+                                data-campaign-name="<%= campaign.name %>">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+<% } %>
+<!-- Pagination -->
+<% if (pagination.totalPages > 1) { %>
+    <div class="pagination-wrapper mt-4">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+            <div class="pagination-info text-muted small">
+                Showing <%= campaigns.length %> of <%= pagination.totalCampaigns %> campaigns
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <% if (pagination.hasPrev) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= pagination.page - 1 %>">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    <% } %>
+                    
+                    <% 
+                    let startPage = Math.max(1, pagination.page - 2);
+                    let endPage = Math.min(pagination.totalPages, pagination.page + 2);
+                    if (endPage - startPage < 4) {
+                        if (startPage === 1) endPage = Math.min(5, pagination.totalPages);
+                        else startPage = Math.max(1, endPage - 4);
+                    }
+                    %>
+                    
+                    <% if (startPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">1</a>
+                        </li>
+                        <% if (startPage > 2) { %>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        <% } %>
+                    <% } %>
+                    
+                    <% for (let i = startPage; i <= endPage; i++) { %>
+                        <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                    
+                    <% if (endPage < pagination.totalPages) { %>
+                        <% if (endPage < pagination.totalPages - 1) { %>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        <% } %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= pagination.totalPages %>"><%= pagination.totalPages %></a>
+                        </li>
+                    <% } %>
+                    
+                    <% if (pagination.hasNext) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= pagination.page + 1 %>">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </div>
+<% } %>
+
+<script src="/js/campaigns.js"></script>

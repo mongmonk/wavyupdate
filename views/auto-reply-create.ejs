@@ -1,0 +1,162 @@
+<% currentPage = 'auto-reply' %>
+
+<!-- Page Header - Compact & Mobile Friendly -->
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a href="/sessions/<%= session.id %>/auto-reply" class="btn btn-light btn-sm" style="min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="flex-grow-1">
+        <h4 class="mb-0 fw-bold" style="font-size: clamp(1rem, 4vw, 1.25rem);">Create Auto-Reply Rule</h4>
+        <small class="text-muted d-none d-sm-inline">Configure automatic responses for <%= session.name %></small>
+    </div>
+</div>
+
+<form id="autoReplyForm">
+    <div class="row g-3">
+        <!-- Form Column -->
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body p-3">
+                    <!-- Trigger Type -->
+                    <div class="mb-3">
+                        <label class="form-label-compact">
+                            <i class="fas fa-bullseye"></i> Trigger Type
+                        </label>
+                        <select class="form-control-compact" id="triggerType" name="triggerType" required>
+                            <option value="exact">🎯 Exact Match</option>
+                            <option value="contains">🔍 Contains</option>
+                            <option value="starts_with">▶️ Starts With</option>
+                            <option value="ends_with">⏹️ Ends With</option>
+                            <option value="regex">⚙️ Regex Pattern</option>
+                        </select>
+                        <small class="form-text-compact" id="triggerHelp">
+                            <i class="fas fa-info-circle"></i> Message must match exactly (case-insensitive)
+                        </small>
+                    </div>
+
+                    <!-- Trigger Value -->
+                    <div class="mb-3">
+                        <label class="form-label-compact">
+                            <i class="fas fa-keyboard"></i> Trigger Value
+                        </label>
+                        <input type="text" class="form-control-compact" id="triggerValue" name="triggerValue" 
+                               placeholder="e.g., hello, hi, help" required>
+                        <small class="form-text-compact">
+                            <i class="fas fa-info-circle"></i> Enter the text that will trigger this auto-reply
+                        </small>
+                    </div>
+
+                    <!-- Reply Messages -->
+                    <div class="mb-3">
+                        <label class="form-label-compact">
+                            <i class="fas fa-reply-all"></i> Reply Messages
+                        </label>
+                        
+                        <!-- Messages List -->
+                        <div id="messagesList" class="mb-3">
+                            <div class="text-center py-4 text-muted" style="background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+                                <i class="fas fa-inbox fa-2x mb-2" style="opacity: 0.3;"></i>
+                                <p class="mb-0 small">No messages added yet. Click a button below to add a reply message.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Message Type Buttons - Compact Grid -->
+                        <div class="btn-group-compact" role="group">
+                            <button type="button" class="btn-compact-icon" onclick="addMessage('text')" title="Text Message">
+                                <i class="fas fa-comment"></i>
+                                <span>Text</span>
+                            </button>
+                            <button type="button" class="btn-compact-icon" onclick="addMessage('media')" title="Media (Image/Video/Audio/Document)">
+                                <i class="fas fa-image"></i>
+                                <span>Media</span>
+                            </button>
+                            <button type="button" class="btn-compact-icon" onclick="addMessage('sticker')" title="Sticker">
+                                <i class="fas fa-sticky-note"></i>
+                                <span>Sticker</span>
+                            </button>
+                            <button type="button" class="btn-compact-icon" onclick="addMessage('location')" title="Location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Location</span>
+                            </button>
+                            <button type="button" class="btn-compact-icon" onclick="addMessage('contact')" title="Contact Card">
+                                <i class="fas fa-address-card"></i>
+                                <span>Contact</span>
+                            </button>
+                            <button type="button" class="btn-compact-icon" onclick="addMessage('poll')" title="Poll">
+                                <i class="fas fa-poll"></i>
+                                <span>Poll</span>
+                            </button>
+                            <button type="button" class="btn-compact-icon" onclick="addMessage('viewOnceImage')" title="View Once Image">
+                                <i class="fas fa-image"></i>
+                                <span>View Once 📷</span>
+                            </button>
+                            <button type="button" class="btn-compact-icon" onclick="addMessage('viewOnceVideo')" title="View Once Video">
+                                <i class="fas fa-video"></i>
+                                <span>View Once 🎥</span>
+                            </button>
+                            <button type="button" class="btn-compact-icon" onclick="addMessage('viewOnceAudio')" title="View Once Audio">
+                                <i class="fas fa-microphone"></i>
+                                <span>View Once 🎵</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="mb-3">
+                        <label class="form-label-compact">
+                            <i class="fas fa-cog"></i> Options
+                        </label>
+                        
+                        <div class="options-grid">
+                            <div class="option-card">
+                                <div class="option-info">
+                                    <div class="option-icon bg-success-subtle">
+                                        <i class="fas fa-power-off text-success"></i>
+                                    </div>
+                                    <div class="option-text">
+                                        <div class="option-title">Active Status</div>
+                                        <div class="option-desc">Enable this rule immediately</div>
+                                    </div>
+                                </div>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="isActive" name="isActive" checked>
+                                </div>
+                            </div>
+                            
+                            <div class="option-card">
+                                <div class="option-info">
+                                    <div class="option-icon bg-info-subtle">
+                                        <i class="fas fa-user text-info"></i>
+                                    </div>
+                                    <div class="option-text">
+                                        <div class="option-title">Reply to Self</div>
+                                        <div class="option-desc">Respond to your own messages</div>
+                                    </div>
+                                </div>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="replyToSelf" name="replyToSelf">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="/sessions/<%= session.id %>/auto-reply" class="btn btn-light flex-grow-1">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success flex-grow-1" id="submitBtn">
+                            <i class="fas fa-check me-1"></i>Create Rule
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+    window.sessionId = '<%= session.id %>';
+</script>
+<script src="/js/auto-reply-create.js"></script>

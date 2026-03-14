@@ -1,0 +1,453 @@
+<div class="pv-container">
+    <div class="pv-wrapper">
+        <% if (phoneVerified) { %>
+            <!-- Already Verified -->
+            <div class="pv-card pv-card-done">
+                <div class="pv-done-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h1 class="pv-done-title">All Set!</h1>
+                <p class="pv-done-text">Your number <strong><%= phoneNumber %></strong> is verified</p>
+                <a href="/dashboard" class="pv-btn pv-btn-primary">
+                    <i class="fas fa-arrow-right"></i>
+                    <span>Continue to Dashboard</span>
+                </a>
+            </div>
+        <% } else { %>
+            <!-- Verification Flow -->
+            <div class="pv-card" id="pvCard">
+                <!-- Progress Steps -->
+                <div class="pv-steps">
+                    <div class="pv-step active" data-step="1">
+                        <span class="pv-step-num">1</span>
+                        <span class="pv-step-text">Phone</span>
+                    </div>
+                    <div class="pv-step-line"></div>
+                    <div class="pv-step" data-step="2">
+                        <span class="pv-step-num">2</span>
+                        <span class="pv-step-text">Verify</span>
+                    </div>
+                    <div class="pv-step-line"></div>
+                    <div class="pv-step" data-step="3">
+                        <span class="pv-step-num"><i class="fas fa-check"></i></span>
+                        <span class="pv-step-text">Done</span>
+                    </div>
+                </div>
+
+                <!-- Step 1: Phone Number -->
+                <div class="pv-content" id="pvStep1">
+                    <div class="pv-header">
+                        <div class="pv-icon pv-icon-phone">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <h2 class="pv-title">Enter your number</h2>
+                        <p class="pv-desc">We'll send a verification code via WhatsApp</p>
+                    </div>
+                    
+                    <div class="pv-form">
+                        <div class="pv-field">
+                            <div class="pv-input-wrap">
+                                <span class="pv-input-prefix">+92</span>
+                                <input type="tel" 
+                                       id="phoneInput" 
+                                       class="pv-input" 
+                                       placeholder="3001234567"
+                                       maxlength="10"
+                                       autocomplete="tel">
+                            </div>
+                            <span class="pv-field-error" id="phoneError"></span>
+                        </div>
+                        
+                        <button type="button" class="pv-btn pv-btn-primary" id="sendBtn" onclick="handleSendOtp()">
+                            <span>Send Code</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="pv-footer">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Your number is safe and won't be shared</span>
+                    </div>
+                </div>
+
+                <!-- Step 2: OTP Verification -->
+                <div class="pv-content pv-hidden" id="pvStep2">
+                    <div class="pv-header">
+                        <div class="pv-icon pv-icon-otp">
+                            <i class="fas fa-sms"></i>
+                        </div>
+                        <h2 class="pv-title">Check your WhatsApp</h2>
+                        <p class="pv-desc">Enter the 6-digit code sent to <strong id="phoneDisplay"></strong></p>
+                    </div>
+                    
+                    <div class="pv-form">
+                        <div class="pv-field">
+                            <div class="pv-otp-inputs" id="otpInputs">
+                                <input type="text" maxlength="1" class="pv-otp-box" data-index="0" inputmode="numeric">
+                                <input type="text" maxlength="1" class="pv-otp-box" data-index="1" inputmode="numeric">
+                                <input type="text" maxlength="1" class="pv-otp-box" data-index="2" inputmode="numeric">
+                                <span class="pv-otp-dash">-</span>
+                                <input type="text" maxlength="1" class="pv-otp-box" data-index="3" inputmode="numeric">
+                                <input type="text" maxlength="1" class="pv-otp-box" data-index="4" inputmode="numeric">
+                                <input type="text" maxlength="1" class="pv-otp-box" data-index="5" inputmode="numeric">
+                            </div>
+                            <span class="pv-field-error" id="otpError"></span>
+                        </div>
+                        
+                        <button type="button" class="pv-btn pv-btn-primary" id="verifyBtn" onclick="handleVerifyOtp()">
+                            <span>Verify</span>
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="pv-timer-row">
+                        <div class="pv-timer">
+                            <i class="fas fa-clock"></i>
+                            <span id="timerText">30:00</span>
+                        </div>
+                        <button type="button" class="pv-link" id="resendBtn" onclick="handleResend()">Resend code</button>
+                    </div>
+                    
+                    <button type="button" class="pv-back" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Change number</span>
+                    </button>
+                </div>
+
+                <!-- Step 3: Success -->
+                <div class="pv-content pv-hidden" id="pvStep3">
+                    <div class="pv-success">
+                        <div class="pv-success-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <h2 class="pv-success-title">Verified!</h2>
+                        <p class="pv-success-text">Your free plan is now active</p>
+                        
+                        <% if (!hasPlan && defaultPlan) { %>
+                        <div class="pv-plan-card">
+                            <div class="pv-plan-badge"><%= defaultPlan.name.toUpperCase() %></div>
+                            <div class="pv-plan-features">
+                                <span><i class="fas fa-check"></i> <%= defaultPlan.total_messages === -1 ? 'Unlimited' : defaultPlan.total_messages.toLocaleString() %> messages/month</span>
+                                <span><i class="fas fa-check"></i> <%= defaultPlan.total_sessions === -1 ? 'Unlimited' : defaultPlan.total_sessions %> WhatsApp sessions</span>
+                                <% if (defaultPlan.feature_auto_reply) { %>
+                                <span><i class="fas fa-check"></i> Auto-reply enabled</span>
+                                <% } %>
+                                <% if (defaultPlan.feature_ai_assistant) { %>
+                                <span><i class="fas fa-check"></i> AI Assistant</span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% } %>
+                        
+                        <a href="/dashboard" class="pv-btn pv-btn-success">
+                            <span>Go to Dashboard</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+let phoneNumber = '';
+let expiryTime = null;
+let countdownInterval = null;
+let resendCooldown = 0;
+
+// OTP Input handling
+const otpBoxes = document.querySelectorAll('.pv-otp-box');
+otpBoxes.forEach((box, index) => {
+    box.addEventListener('input', (e) => {
+        const val = e.target.value.replace(/\D/g, '');
+        e.target.value = val;
+        
+        if (val && index < 5) {
+            otpBoxes[index + 1].focus();
+        }
+        
+        // Auto-submit when all filled
+        if (getOtpValue().length === 6) {
+            handleVerifyOtp();
+        }
+    });
+    
+    box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            otpBoxes[index - 1].focus();
+        }
+    });
+    
+    box.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+        paste.split('').slice(0, 6).forEach((char, i) => {
+            if (otpBoxes[i]) otpBoxes[i].value = char;
+        });
+        if (paste.length >= 6) handleVerifyOtp();
+    });
+});
+
+function getOtpValue() {
+    return Array.from(otpBoxes).map(b => b.value).join('');
+}
+
+function clearOtpInputs() {
+    otpBoxes.forEach(b => b.value = '');
+    otpBoxes[0]?.focus();
+}
+
+// Phone input formatting
+document.getElementById('phoneInput')?.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').substring(0, 10);
+});
+
+async function handleSendOtp() {
+    const input = document.getElementById('phoneInput');
+    const error = document.getElementById('phoneError');
+    const btn = document.getElementById('sendBtn');
+    
+    const phone = input.value.trim();
+    
+    if (!phone || phone.length !== 10 || !phone.startsWith('3')) {
+        showError('phoneError', 'Enter valid 10-digit number starting with 3');
+        return;
+    }
+    
+    hideError('phoneError');
+    phoneNumber = '0' + phone;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span>Sending...</span><i class="fas fa-spinner fa-spin"></i>';
+    
+    try {
+        const res = await fetch('/webapi/phone-verification/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-csrf-token': '<%= csrfToken %>' },
+            body: JSON.stringify({ phoneNumber })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            Toast.success('Code sent!');
+            document.getElementById('phoneDisplay').textContent = '+92' + phone;
+            expiryTime = new Date(data.expiresAt);
+            saveState();
+            goToStep(2);
+            startTimer();
+            startResendCooldown(60);
+        } else {
+            showError('phoneError', data.error || 'Failed to send code');
+            if (data.waitSeconds) startBtnCooldown(data.waitSeconds);
+        }
+    } catch (e) {
+        showError('phoneError', 'Something went wrong. Try again.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Send Code</span><i class="fas fa-arrow-right"></i>';
+    }
+}
+
+async function handleVerifyOtp() {
+    const otp = getOtpValue();
+    const btn = document.getElementById('verifyBtn');
+    
+    if (otp.length !== 6) {
+        showError('otpError', 'Enter all 6 digits');
+        return;
+    }
+    
+    hideError('otpError');
+    btn.disabled = true;
+    btn.innerHTML = '<span>Verifying...</span><i class="fas fa-spinner fa-spin"></i>';
+    
+    try {
+        const res = await fetch('/webapi/phone-verification/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-csrf-token': '<%= csrfToken %>' },
+            body: JSON.stringify({ phoneNumber, otpCode: otp })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success && data.phoneVerified) {
+            Toast.success('Verified!');
+            clearState();
+            stopTimer();
+            goToStep(3);
+        } else {
+            showError('otpError', data.error || 'Invalid code');
+            clearOtpInputs();
+        }
+    } catch (e) {
+        showError('otpError', 'Something went wrong. Try again.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Verify</span><i class="fas fa-check"></i>';
+    }
+}
+
+async function handleResend() {
+    if (resendCooldown > 0) return;
+    
+    const btn = document.getElementById('resendBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    
+    try {
+        const res = await fetch('/webapi/phone-verification/resend-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-csrf-token': '<%= csrfToken %>' },
+            body: JSON.stringify({ phoneNumber })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            Toast.success('Code resent!');
+            expiryTime = new Date(data.expiresAt);
+            startTimer();
+            startResendCooldown(60);
+            clearOtpInputs();
+        } else {
+            Toast.error(data.error || 'Failed to resend');
+            if (data.waitSeconds) startResendCooldown(data.waitSeconds);
+        }
+    } catch (e) {
+        Toast.error('Failed to resend');
+    }
+}
+
+function goToStep(step) {
+    // Update steps indicator
+    document.querySelectorAll('.pv-step').forEach(el => {
+        const s = parseInt(el.dataset.step);
+        el.classList.toggle('active', s === step);
+        el.classList.toggle('done', s < step);
+    });
+    
+    document.querySelectorAll('.pv-step-line').forEach((line, i) => {
+        line.classList.toggle('done', i < step - 1);
+    });
+    
+    // Show/hide content
+    document.getElementById('pvStep1').classList.toggle('pv-hidden', step !== 1);
+    document.getElementById('pvStep2').classList.toggle('pv-hidden', step !== 2);
+    document.getElementById('pvStep3').classList.toggle('pv-hidden', step !== 3);
+    
+    if (step === 2) {
+        setTimeout(() => otpBoxes[0]?.focus(), 100);
+    }
+}
+
+function goBack() {
+    stopTimer();
+    clearOtpInputs();
+    hideError('otpError');
+    goToStep(1);
+}
+
+function startTimer() {
+    stopTimer();
+    const timerEl = document.getElementById('timerText');
+    
+    countdownInterval = setInterval(() => {
+        const diff = expiryTime - new Date();
+        if (diff <= 0) {
+            stopTimer();
+            timerEl.textContent = 'Expired';
+            timerEl.parentElement.classList.add('pv-timer-expired');
+            return;
+        }
+        const m = Math.floor(diff / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        timerEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+function stopTimer() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+}
+
+function startResendCooldown(seconds) {
+    resendCooldown = seconds;
+    const btn = document.getElementById('resendBtn');
+    
+    const interval = setInterval(() => {
+        resendCooldown--;
+        if (resendCooldown > 0) {
+            btn.textContent = `Resend (${resendCooldown}s)`;
+            btn.disabled = true;
+        } else {
+            btn.textContent = 'Resend code';
+            btn.disabled = false;
+            clearInterval(interval);
+        }
+    }, 1000);
+}
+
+function startBtnCooldown(seconds) {
+    const btn = document.getElementById('sendBtn');
+    let remaining = seconds;
+    btn.disabled = true;
+    
+    const interval = setInterval(() => {
+        remaining--;
+        if (remaining > 0) {
+            btn.innerHTML = `<span>Wait ${remaining}s</span><i class="fas fa-clock"></i>`;
+        } else {
+            btn.innerHTML = '<span>Send Code</span><i class="fas fa-arrow-right"></i>';
+            btn.disabled = false;
+            clearInterval(interval);
+        }
+    }, 1000);
+}
+
+function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.classList.add('show');
+}
+
+function hideError(id) {
+    document.getElementById(id).classList.remove('show');
+}
+
+function saveState() {
+    sessionStorage.setItem('pvState', JSON.stringify({ phoneNumber, expiresAt: expiryTime.toISOString() }));
+}
+
+function clearState() {
+    sessionStorage.removeItem('pvState');
+}
+
+function restoreState() {
+    const saved = sessionStorage.getItem('pvState');
+    if (!saved) return;
+    
+    try {
+        const state = JSON.parse(saved);
+        const expiry = new Date(state.expiresAt);
+        
+        if (expiry > new Date()) {
+            phoneNumber = state.phoneNumber;
+            expiryTime = expiry;
+            document.getElementById('phoneInput').value = phoneNumber.substring(1);
+            document.getElementById('phoneDisplay').textContent = '+92' + phoneNumber.substring(1);
+            goToStep(2);
+            startTimer();
+        } else {
+            clearState();
+        }
+    } catch (e) {
+        clearState();
+    }
+}
+
+restoreState();
+</script>

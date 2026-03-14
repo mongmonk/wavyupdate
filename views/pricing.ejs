@@ -1,0 +1,377 @@
+<% currentPage='pricing' %>
+
+    <!-- Page Header - Modern Dashboard Style -->
+    <div class="pricing-page-header mb-4">
+        <div class="text-center">
+            <h2 class="mb-2 fw-bold"><i class="fas fa-crown me-2 text-warning"></i>Choose Your Plan</h2>
+            <p class="text-muted mb-0">Simple, transparent pricing that grows with you</p>
+        </div>
+    </div>
+
+    <!-- Pricing Cards -->
+    <div class="row g-3 mb-4">
+        <% tiers.forEach((tier, index)=> { %>
+            <div class="col-md-6 col-lg-3">
+                <div class="card pricing-card-compact <%= user && user.tier === tier.id ? 'pricing-card-active' : '' %> <%= tier.popular ? 'pricing-card-popular' : '' %> h-100"
+                    data-tier-color="<%= tier.color %>">
+                    <% if (user && user.tier===tier.id) { %>
+                        <div class="pricing-badge-compact pricing-badge-active">
+                            <i class="fas fa-check"></i> Active
+                        </div>
+                        <% } else if (tier.popular) { %>
+                            <div class="pricing-badge-compact pricing-badge-popular"
+                                data-tier-color="<%= tier.color %>">
+                                <i class="fas fa-star"></i> Popular
+                            </div>
+                            <% } %>
+
+                                <div class="card-body p-3 d-flex flex-column">
+                                    <!-- Plan Header -->
+                                    <div class="pricing-header-compact">
+                                        <div class="pricing-icon-compact" data-tier-color="<%= tier.color %>">
+                                            <i
+                                                class="fas <%= ['fa-rocket', 'fa-star', 'fa-crown', 'fa-gem'][index % 4] %>"></i>
+                                        </div>
+                                        <h5 class="pricing-name-compact">
+                                            <%= tier.name %>
+                                        </h5>
+                                    </div>
+
+                                    <!-- Price -->
+                                    <div class="pricing-price-compact">
+                                        <% if (typeof tier.price==='string' && tier.price==='Custom' ) { %>
+                                            <div class="price-value-compact">Custom</div>
+                                            <div class="price-period-compact">Contact us</div>
+                                            <% } else if (tier.price===0) { %>
+                                                <div class="price-value-compact">Free</div>
+                                                <div class="price-period-compact">Forever</div>
+                                                <% } else { %>
+                                                    <div class="price-value-compact">$<%=
+                                                            Math.floor(tier.price).toLocaleString() %>
+                                                    </div>
+                                                    <div class="price-period-compact">
+                                                        <%= tier.expiryDays ? tier.expiryDays + ' days' : 'Lifetime' %>
+                                                    </div>
+                                                    <% } %>
+                                    </div>
+
+                                    <!-- Features -->
+                                    <ul class="pricing-features-compact flex-grow-1">
+                                        <li>
+                                            <i class="fas fa-check"></i>
+                                            <span>
+                                                <%= tier.totalMessages===-1 ? '∞' : tier.totalMessages.toLocaleString()
+                                                    %> messages
+                                            </span>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-check"></i>
+                                            <span>
+                                                <%= tier.totalSessions===-1 ? '∞' : tier.totalSessions %> sessions
+                                            </span>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-check"></i>
+                                            <span>
+                                                <%= tier.totalContacts===-1 ? '∞' : tier.totalContacts.toLocaleString()
+                                                    %> contacts
+                                            </span>
+                                        </li>
+                                        <% if (tier.totalTemplates !==0) { %>
+                                            <li>
+                                                <i class="fas fa-check"></i>
+                                                <span>
+                                                    <%= tier.totalTemplates===-1 ? '∞' : tier.totalTemplates %>
+                                                        templates
+                                                </span>
+                                            </li>
+                                            <% } %>
+                                                <% if (tier.features.aiAssistant) { %>
+                                                    <li>
+                                                        <i class="fas fa-check"></i>
+                                                        <span>AI Assistant</span>
+                                                    </li>
+                                                    <% } %>
+                                                        <% if (tier.features.autoReply) { %>
+                                                            <li>
+                                                                <i class="fas fa-check"></i>
+                                                                <span>Auto Reply</span>
+                                                            </li>
+                                                            <% } %>
+                                                                <% if (tier.features.apiAccess) { %>
+                                                                    <li>
+                                                                        <i class="fas fa-check"></i>
+                                                                        <span>API Access</span>
+                                                                    </li>
+                                                                    <% } %>
+                                    </ul>
+
+                                    <!-- CTA Button - Always at bottom -->
+                                    <div class="mt-auto">
+                                        <% if (user && user.tier===tier.id) { %>
+                                            <button class="btn-pricing-compact btn-pricing-current w-100" disabled>
+                                                <i class="fas fa-check me-1"></i>Current
+                                            </button>
+                                            <% } else if (tier.id==='enterprise' ) { %>
+                                                <a href="https://wa.me/923090695353?text=Hi,%20I'm%20interested%20in%20the%20Enterprise%20plan"
+                                                    target="_blank" class="btn-pricing-compact w-100"
+                                                    data-tier-color="<%= tier.color %>">
+                                                    <i class="fab fa-whatsapp me-1"></i>Contact
+                                                </a>
+                                                <% } else { %>
+                                                    <a href="https://wa.me/923090695353?text=Hi,%20I%20want%20to%20upgrade%20to%20the%20<%= tier.name %>%20plan"
+                                                        target="_blank" class="btn-pricing-compact w-100"
+                                                        data-tier-color="<%= tier.color %>">
+                                                        <i class="fab fa-whatsapp me-1"></i>Get Started
+                                                    </a>
+                                                    <% } %>
+                                    </div>
+                                </div>
+                </div>
+            </div>
+            <% }) %>
+    </div>
+
+    <!-- Feature Comparison Table -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-table me-2 text-primary"></i>Compare Plans</h5>
+        </div>
+        <div class="card-body p-0">
+            <!-- Desktop Table -->
+            <div class="table-responsive d-none d-lg-block">
+                <table class="table pricing-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <% tiers.forEach(tier=> { %>
+                                <th class="text-center">
+                                    <%= tier.name %>
+                                </th>
+                                <% }) %>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-semibold"><i class="fas fa-envelope me-2 text-primary"></i>Total Messages</td>
+                            <% tiers.forEach(tier=> { %>
+                                <td class="text-center">
+                                    <%= tier.totalMessages===-1 ? '∞' : tier.totalMessages.toLocaleString() %>
+                                </td>
+                                <% }) %>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="fab fa-whatsapp me-2 text-success"></i>WhatsApp Sessions
+                            </td>
+                            <% tiers.forEach(tier=> { %>
+                                <td class="text-center">
+                                    <%= tier.totalSessions===-1 ? '∞' : tier.totalSessions %>
+                                </td>
+                                <% }) %>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="fas fa-address-book me-2 text-info"></i>Contacts</td>
+                            <% tiers.forEach(tier=> { %>
+                                <td class="text-center">
+                                    <%= tier.totalContacts===-1 ? '∞' : tier.totalContacts.toLocaleString() %>
+                                </td>
+                                <% }) %>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="fas fa-file-alt me-2 text-warning"></i>Templates</td>
+                            <% tiers.forEach(tier=> { %>
+                                <td class="text-center">
+                                    <%= tier.totalTemplates===-1 ? '∞' : tier.totalTemplates %>
+                                </td>
+                                <% }) %>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="fas fa-robot me-2 text-primary"></i>AI Assistant</td>
+                            <% tiers.forEach(tier=> { %>
+                                <td class="text-center">
+                                    <% if (tier.features.aiAssistant) { %>
+                                        <i class="fas fa-check-circle text-success fa-lg"></i>
+                                        <% } else { %>
+                                            <i class="fas fa-times-circle text-muted"></i>
+                                            <% } %>
+                                </td>
+                                <% }) %>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="fas fa-reply-all me-2 text-success"></i>Auto Reply</td>
+                            <% tiers.forEach(tier=> { %>
+                                <td class="text-center">
+                                    <% if (tier.features.autoReply) { %>
+                                        <i class="fas fa-check-circle text-success fa-lg"></i>
+                                        <% } else { %>
+                                            <i class="fas fa-times-circle text-muted"></i>
+                                            <% } %>
+                                </td>
+                                <% }) %>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="fas fa-code me-2 text-danger"></i>API Access</td>
+                            <% tiers.forEach(tier=> { %>
+                                <td class="text-center">
+                                    <% if (tier.features.apiAccess) { %>
+                                        <i class="fas fa-check-circle text-success fa-lg"></i>
+                                        <% } else { %>
+                                            <i class="fas fa-times-circle text-muted"></i>
+                                            <% } %>
+                                </td>
+                                <% }) %>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold"><i class="fas fa-tachometer-alt me-2 text-primary"></i>API Rate
+                                Limit</td>
+                            <% tiers.forEach(tier=> { %>
+                                <td class="text-center">
+                                    <% if (!tier.features?.apiAccess) { %>
+                                        <span class="text-muted">-</span>
+                                        <% } else if (tier.apiRequestsPerHour===-1) { %>
+                                            ∞
+                                            <% } else if (tier.apiRequestsPerHour===0) { %>
+                                                <span class="text-muted">-</span>
+                                                <% } else { %>
+                                                    <%= tier.apiRequestsPerHour %>/hour
+                                                        <% } %>
+                                </td>
+                                <% }) %>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Comparison -->
+            <div class="d-lg-none p-3">
+                <% tiers.forEach(tier=> { %>
+                    <div class="comparison-card-mobile mb-3">
+                        <h6 class="fw-bold mb-3">
+                            <%= tier.name %>
+                        </h6>
+                        <div class="comparison-item">
+                            <span class="comparison-label"><i class="fas fa-envelope me-2"></i>Messages</span>
+                            <span class="comparison-value">
+                                <%= tier.totalMessages===-1 ? '∞' : tier.totalMessages.toLocaleString() %>
+                            </span>
+                        </div>
+                        <div class="comparison-item">
+                            <span class="comparison-label"><i class="fab fa-whatsapp me-2"></i>Sessions</span>
+                            <span class="comparison-value">
+                                <%= tier.totalSessions===-1 ? '∞' : tier.totalSessions %>
+                            </span>
+                        </div>
+                        <div class="comparison-item">
+                            <span class="comparison-label"><i class="fas fa-address-book me-2"></i>Contacts</span>
+                            <span class="comparison-value">
+                                <%= tier.totalContacts===-1 ? '∞' : tier.totalContacts.toLocaleString() %>
+                            </span>
+                        </div>
+                        <div class="comparison-item">
+                            <span class="comparison-label"><i class="fas fa-file-alt me-2"></i>Templates</span>
+                            <span class="comparison-value">
+                                <%= tier.totalTemplates===-1 ? '∞' : tier.totalTemplates %>
+                            </span>
+                        </div>
+                        <div class="comparison-item">
+                            <span class="comparison-label"><i class="fas fa-robot me-2"></i>AI Assistant</span>
+                            <span class="comparison-value">
+                                <% if (tier.features.aiAssistant) { %>
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <% } else { %>
+                                        <i class="fas fa-times-circle text-muted"></i>
+                                        <% } %>
+                            </span>
+                        </div>
+                        <div class="comparison-item">
+                            <span class="comparison-label"><i class="fas fa-reply-all me-2"></i>Auto Reply</span>
+                            <span class="comparison-value">
+                                <% if (tier.features.autoReply) { %>
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <% } else { %>
+                                        <i class="fas fa-times-circle text-muted"></i>
+                                        <% } %>
+                            </span>
+                        </div>
+                        <div class="comparison-item">
+                            <span class="comparison-label"><i class="fas fa-code me-2"></i>API Access</span>
+                            <span class="comparison-value">
+                                <% if (tier.features.apiAccess) { %>
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <% } else { %>
+                                        <i class="fas fa-times-circle text-muted"></i>
+                                        <% } %>
+                            </span>
+                        </div>
+                        <div class="comparison-item">
+                            <span class="comparison-label"><i class="fas fa-tachometer-alt me-2"></i>API Rate
+                                Limit</span>
+                            <span class="comparison-value">
+                                <% if (!tier.features?.apiAccess) { %>
+                                    <span class="text-muted">-</span>
+                                    <% } else if (tier.apiRequestsPerHour===-1) { %>
+                                        ∞
+                                        <% } else if (tier.apiRequestsPerHour===0) { %>
+                                            <span class="text-muted">-</span>
+                                            <% } else { %>
+                                                <%= tier.apiRequestsPerHour %>/hour
+                                                    <% } %>
+                            </span>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="card pricing-help-card shadow-sm">
+        <div class="card-body text-center p-4 p-lg-5">
+            <div class="pricing-help-icon mb-3">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <h4 class="fw-bold mb-2">Need Help Choosing?</h4>
+            <p class="text-muted mb-4">Our team is here to help you find the perfect plan for your business</p>
+            <a href="https://wa.me/923090695353?text=Hi,%20I%20have%20questions%20about%20pricing" target="_blank"
+                class="btn btn-success btn-lg px-4">
+                <i class="fab fa-whatsapp me-2"></i>Chat with Us on WhatsApp
+            </a>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Apply tier colors dynamically from database
+            document.querySelectorAll('[data-tier-color]').forEach(function (el) {
+                const color = el.getAttribute('data-tier-color');
+
+                if (el.classList.contains('pricing-card-compact')) {
+                    // Apply border color to card
+                    el.style.borderTopColor = color;
+                    el.style.borderTopWidth = '3px';
+                } else if (el.classList.contains('pricing-badge-compact')) {
+                    // Apply background to badge
+                    el.style.backgroundColor = color;
+                } else if (el.classList.contains('pricing-icon-compact')) {
+                    // Apply background to icon
+                    el.style.background = `linear-gradient(135deg, ${color}, ${color}dd)`;
+                } else if (el.classList.contains('btn-pricing-compact')) {
+                    // Apply background to button
+                    el.style.background = `linear-gradient(135deg, ${color}, ${color}dd)`;
+                    el.style.color = 'white';
+                    el.style.border = 'none';
+
+                    // Add hover effect
+                    el.addEventListener('mouseenter', function () {
+                        this.style.transform = 'translateY(-2px)';
+                        this.style.boxShadow = `0 4px 12px ${color}50`;
+                    });
+                    el.addEventListener('mouseleave', function () {
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = 'none';
+                    });
+                }
+            });
+        });
+    </script>

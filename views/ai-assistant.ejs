@@ -1,0 +1,412 @@
+<!-- Page Header - Modern Dashboard Style -->
+<div class="auto-reply-page-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <a href="/dashboard" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 class="mb-1 fw-bold"><i class="fas fa-brain me-2"></i>AI Assistant</h2>
+                    <p class="text-muted mb-0">Configure intelligent responses for <%= session.name %></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards - Modern Design (2 per row on mobile) -->
+<div class="row g-3 mb-4">
+    <!-- Session Card -->
+    <div class="col-6 col-lg-3">
+        <div class="auto-reply-stat-card <%= session.status === 'connected' ? 'stat-success' : 'stat-danger' %>">
+            <div class="stat-icon">
+                <i class="fas fa-<%= session.status === 'connected' ? 'wifi' : 'unlink' %>"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Session</div>
+                <div class="stat-value"><%= session.status === 'connected' ? 'Connected' : 'Offline' %></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Phone Card -->
+    <div class="col-6 col-lg-3">
+        <div class="auto-reply-stat-card stat-primary">
+            <div class="stat-icon">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">WhatsApp</div>
+                <div class="stat-value" style="font-size: 1.1rem;"><%= session.phone_number || 'N/A' %></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Status Card -->
+    <div class="col-6 col-lg-3">
+        <div class="auto-reply-stat-card <%= aiConfig && aiConfig.is_active ? 'stat-success' : 'stat-info' %>">
+            <div class="stat-icon">
+                <i class="fas fa-<%= aiConfig && aiConfig.is_active ? 'check-circle' : 'power-off' %>"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">AI Status</div>
+                <div class="stat-value" id="statAIStatus">
+                    <%= aiConfig && aiConfig.is_active ? 'Active' : 'Inactive' %>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Provider Card -->
+    <div class="col-6 col-lg-3">
+        <div class="auto-reply-stat-card stat-info">
+            <div class="stat-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Provider</div>
+                <div class="stat-value" style="font-size: 1rem;" id="statProvider">
+                    <%= aiConfig ? (aiConfig.ai_provider === 'openai' ? '🔥 OpenAI' : aiConfig.ai_provider === 'deepseek' ? '🚀 DeepSeek' : aiConfig.ai_provider === 'gemini' ? '✨ Gemini' : '🌐 OpenRouter') : 'Not Set' %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Info Alert -->
+<% if (session.status !== 'connected') { %>
+<div class="alert alert-warning shadow-sm mb-4">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+        <div>
+            <strong>Session Not Connected</strong><br>
+            <small>AI assistant will only work when your WhatsApp session is connected. Please connect your session first.</small>
+        </div>
+    </div>
+</div>
+<% } %>
+
+<!-- Main Content -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-brain me-2 text-purple"></i>AI Assistant Configuration</h5>
+    </div>
+    <div class="card-body">
+        <form id="aiConfigForm">
+                    <!-- Provider & Model Section -->
+                    <div class="ar-section">
+                        <div class="ar-section-label">
+                            <i class="fas fa-server"></i>
+                            <span>AI Provider & Model</span>
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <select class="ar-select" id="ai_provider" name="ai_provider" onchange="handleProviderChange()">
+                                    <option value="openai" <%= aiConfig && aiConfig.ai_provider === 'openai' ? 'selected' : (!aiConfig ? 'selected' : '') %>>🔥 OpenAI</option>
+                                    <option value="deepseek" <%= aiConfig && aiConfig.ai_provider === 'deepseek' ? 'selected' : '' %>>🚀 DeepSeek</option>
+                                    <option value="gemini" <%= aiConfig && aiConfig.ai_provider === 'gemini' ? 'selected' : '' %>>✨ Google Gemini</option>
+                                    <option value="openrouter" <%= aiConfig && aiConfig.ai_provider === 'openrouter' ? 'selected' : '' %>>🌐 OpenRouter (100+ Models)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <!-- OpenRouter Search & Filter -->
+                                <div id="openrouter-controls" style="display: none;" class="mb-2">
+                                    <div class="input-group input-group-sm mb-2">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                        <input type="text" id="model-search" class="form-control" placeholder="Search models...">
+                                    </div>
+                                    <div class="btn-group btn-group-sm w-100 mb-2" role="group">
+                                        <input type="radio" class="btn-check" name="model-filter" id="filter-all" value="all" checked>
+                                        <label class="btn btn-outline-secondary" for="filter-all">All</label>
+                                        
+                                        <input type="radio" class="btn-check" name="model-filter" id="filter-free" value="free">
+                                        <label class="btn btn-outline-success" for="filter-free">💚 Free</label>
+                                        
+                                        <input type="radio" class="btn-check" name="model-filter" id="filter-paid" value="paid">
+                                        <label class="btn btn-outline-primary" for="filter-paid">💎 Paid</label>
+                                    </div>
+                                    <div id="loading-models" class="text-center py-2" style="display: none;">
+                                        <div class="spinner-border spinner-border-sm text-primary"></div>
+                                        <small class="text-muted ms-2">Loading...</small>
+                                    </div>
+                                </div>
+                                
+                                <select class="ar-select" id="model" name="model">
+                                    <option value="">Select model...</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="ar-help-text">
+                            <i class="fas fa-info-circle"></i>
+                            Get API key: 
+                            <a href="https://platform.openai.com/api-keys" target="_blank" id="link-openai">OpenAI</a>
+                            <a href="https://platform.deepseek.com" target="_blank" id="link-deepseek" style="display: none;">DeepSeek</a>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" id="link-gemini" style="display: none;">Gemini</a>
+                            <a href="https://openrouter.ai/keys" target="_blank" id="link-openrouter" style="display: none;">OpenRouter</a>
+                        </div>
+                    </div>
+
+                    <!-- API Key Section -->
+                    <div class="ar-section">
+                        <div class="ar-section-label">
+                            <i class="fas fa-key"></i>
+                            <span>API Key</span>
+                        </div>
+                        <input type="password" class="ar-input" id="ai_api_key" name="ai_api_key"
+                               value="<%= aiConfig ? aiConfig.ai_api_key : '' %>"
+                               placeholder="sk-... or AIza..." required>
+                        <div class="ar-help-text">
+                            <i class="fas fa-lock"></i>
+                            Your API key is encrypted and stored securely
+                        </div>
+                    </div>
+
+                    <!-- System Prompt Section -->
+                    <div class="ar-section">
+                        <div class="ar-section-label">
+                            <i class="fas fa-comment-dots"></i>
+                            <span>System Prompt</span>
+                        </div>
+                        <textarea class="ar-textarea" id="system_prompt" name="system_prompt" rows="3"
+                                  placeholder="You are a helpful customer service assistant..."
+                        ><%= aiConfig ? aiConfig.system_prompt : 'You are a helpful WhatsApp assistant.' %></textarea>
+                        <div class="ar-help-text">
+                            <i class="fas fa-magic"></i>
+                            Define AI personality and behavior
+                        </div>
+                    </div>
+
+                    <!-- Knowledge Base Section -->
+                    <div class="ar-section">
+                        <div class="ar-section-label">
+                            <i class="fas fa-database"></i>
+                            <span>Knowledge Base</span>
+                            <span class="badge bg-secondary ms-2" style="font-size: 0.7rem;">Optional</span>
+                        </div>
+                        <textarea class="ar-textarea" id="knowledge_base" name="knowledge_base" rows="5"
+                                  placeholder="Business hours: 9 AM - 6 PM&#10;Products: Electronics&#10;Shipping: 3-5 days&#10;Support: support@example.com"
+                        ><%= aiConfig ? aiConfig.knowledge_base : '' %></textarea>
+                        <div class="ar-help-text">
+                            <i class="fas fa-lightbulb"></i>
+                            Train AI with your business information
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings Section -->
+                    <div class="ar-section">
+                        <div class="ar-section-label">
+                            <i class="fas fa-cog"></i>
+                            <span>Advanced Settings</span>
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">
+                                    <i class="fas fa-thermometer-half"></i> Temperature
+                                    <i class="fas fa-info-circle text-muted ms-1" style="cursor: pointer;" 
+                                       data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Controls randomness in responses. Lower values (0-0.5) = more focused and deterministic. Higher values (1-2) = more creative and varied. Recommended: 0.7 for balanced responses."></i>
+                                    <span class="badge bg-primary ms-1" id="tempValue"><%= aiConfig ? aiConfig.temperature : '0.7' %></span>
+                                </label>
+                                <input type="range" class="form-range" id="temperature" name="temperature"
+                                       min="0" max="2" step="0.1" value="<%= aiConfig ? aiConfig.temperature : '0.7' %>">
+                                <div class="d-flex justify-content-between small text-muted">
+                                    <span><i class="fas fa-bullseye"></i> Focused</span>
+                                    <span><i class="fas fa-palette"></i> Creative</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">
+                                    <i class="fas fa-text-width"></i> Max Tokens
+                                    <i class="fas fa-info-circle text-muted ms-1" style="cursor: pointer;" 
+                                       data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Maximum length of AI response. 1 token ≈ 4 characters or ¾ of a word. Example: 500 tokens ≈ 375 words. Higher values allow longer responses but cost more API credits."></i>
+                                </label>
+                                <input type="number" class="form-control form-control-sm" id="max_tokens" name="max_tokens"
+                                       min="50" max="68000" value="<%= aiConfig ? aiConfig.max_tokens : '500' %>">
+                                <small class="text-muted">50-68000</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">
+                                    <i class="fas fa-history"></i> Memory
+                                    <i class="fas fa-info-circle text-muted ms-1" style="cursor: pointer;" 
+                                       data-bs-toggle="tooltip" data-bs-placement="top" 
+                                       title="Number of previous messages AI remembers per user. Higher = better context but more API usage. Set to 0 to disable memory (each message treated independently)."></i>
+                                    <span class="badge bg-warning ms-1" id="memoryValue"><%= aiConfig ? aiConfig.conversation_limit : '10' %></span>
+                                </label>
+                                <input type="range" class="form-range" id="conversation_limit" name="conversation_limit"
+                                       min="0" max="100" step="5" value="<%= aiConfig ? aiConfig.conversation_limit : '10' %>">
+                                <div class="d-flex justify-content-between small text-muted">
+                                    <span><i class="fas fa-ban"></i> Off</span>
+                                    <span><i class="fas fa-brain"></i> 100 msgs</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Options Section - Compact Inline -->
+                    <div class="ar-options">
+                        <div class="ar-option-item">
+                            <div class="ar-option-info">
+                                <i class="fas fa-power-off text-success"></i>
+                                <span>Enable AI Assistant</span>
+                            </div>
+                            <label class="ar-switch">
+                                <input type="checkbox" id="is_active" name="is_active" <%= aiConfig && aiConfig.is_active ? 'checked' : '' %>>
+                                <span class="ar-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-success btn-lg px-5">
+                            <i class="fas fa-save me-2"></i>Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+<!-- Test AI & Info Section -->
+<div class="row g-4 mt-4">
+    <!-- Test AI Section -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-flask me-2 text-warning"></i>Test AI Assistant</h5>
+            </div>
+            <div class="card-body">
+                <form id="testAIForm">
+                    <div class="ar-section">
+                        <div class="ar-section-label">
+                            <i class="fas fa-comment"></i>
+                            <span>Test Message</span>
+                        </div>
+                        <textarea class="ar-textarea" id="test_message" name="test_message" rows="3"
+                                  placeholder="Type a message to test AI response..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-paper-plane me-2"></i>Test AI Response
+                    </button>
+                </form>
+
+                <div id="testResponse" class="mt-3" style="display: none;">
+                    <div class="alert alert-info mb-0">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-robot fa-2x me-3 text-primary"></i>
+                            <div class="flex-grow-1">
+                                <strong class="text-primary">AI Response:</strong>
+                                <div id="testResponseText" class="mt-2 text-dark"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Sidebar -->
+    <div class="col-lg-4">
+        <!-- How It Works -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="fas fa-info-circle me-2 text-info"></i>How It Works</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-start mb-3 pb-3 border-bottom">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                            <strong>1</strong>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">Message Received</h6>
+                        <small class="text-muted">System checks auto-reply rules first</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start mb-3 pb-3 border-bottom">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                            <strong>2</strong>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">No Match Found</h6>
+                        <small class="text-muted">AI assistant takes over automatically</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                            <strong>3</strong>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">Smart Response</h6>
+                        <small class="text-muted">AI uses your knowledge base for accurate answers</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Providers Info -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="fas fa-server me-2 text-primary"></i>Supported Providers</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="text-center p-2 border rounded">
+                            <div class="fs-3 mb-1">🔥</div>
+                            <strong class="d-block small">OpenAI</strong>
+                            <small class="text-muted" style="font-size: 0.7rem;">GPT-4, GPT-3.5</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2 border rounded">
+                            <div class="fs-3 mb-1">🚀</div>
+                            <strong class="d-block small">DeepSeek</strong>
+                            <small class="text-muted" style="font-size: 0.7rem;">Cost-effective</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2 border rounded">
+                            <div class="fs-3 mb-1">✨</div>
+                            <strong class="d-block small">Gemini</strong>
+                            <small class="text-muted" style="font-size: 0.7rem;">Google AI</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2 border rounded">
+                            <div class="fs-3 mb-1">🌐</div>
+                            <strong class="d-block small">OpenRouter</strong>
+                            <small class="text-muted" style="font-size: 0.7rem;">100+ models</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Pass saved config to JavaScript
+    window.savedAIConfig = {
+        provider: '<%= aiConfig ? aiConfig.ai_provider : "openai" %>',
+        model: '<%= aiConfig ? aiConfig.model : "" %>'
+    };
+    
+    // Initialize Bootstrap tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+<script src="/js/ai-assistant.js"></script>
