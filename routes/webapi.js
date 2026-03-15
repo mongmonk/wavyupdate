@@ -56,6 +56,7 @@ router.get('/sessions/:sessionId', requireWebAuth, validateSessionId, verifySess
 router.delete('/sessions/:sessionId', requireWebAuth, validateSessionId, verifySessionOwnership, ApiController.deleteSession);
 router.post('/sessions/:sessionId/reconnect', requireWebAuth, validateSessionId, verifySessionOwnership, ApiController.reconnectSession);
 router.get('/sessions/:sessionId/qr', requireWebAuth, validateSessionId, verifySessionOwnership, ApiController.getQRCode);
+router.post('/sessions/:sessionId/webhook', requireWebAuth, validateSessionId, verifySessionOwnership, ApiController.saveWebhookSettings);
 
 // Messaging endpoints for web interface (with message limit check)
 router.post('/sessions/:sessionId/send', requireWebAuth, checkMessageLimit, validateSessionId, validateSendMessage, verifySessionOwnership, ApiController.sendMessage);
