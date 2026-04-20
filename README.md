@@ -20,6 +20,7 @@ Platform web untuk mengelola banyak akun WhatsApp sekaligus dengan fitur automat
 - [Webhook Session](#webhook-session)
 - [WhatsApp OTP (WABA) Setup](#whatsapp-otp-waba-setup)
 - [Deployment](#deployment)
+- [CI/CD dengan GitHub Actions](#cicd-dengan-github-actions)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -482,6 +483,89 @@ Aktifkan HTTPS (Let's Encrypt) sebelum production.
 
 ---
 
+## CI/CD dengan GitHub Actions
+
+Repo sudah dilengkapi 2 workflow di `.github/workflows/`:
+
+| Workflow | Trigger | Fungsi |
+|---|---|---|
+| `ci.yml` | Push ke non-main branch, PR ke main | Syntax check + Docker build verify |
+| `deploy.yml` | Push ke `main`, manual dispatch | CI check → SSH deploy ke server |
+
+### Cara Kerja Deploy
+
+1. Push ke `main` → job `test` jalan (syntax check + build image)
+2. Jika lulus → job `deploy` SSH ke server dan menjalankan:
+   - Backup folder `sessions/` (retain 5 backup terakhir)
+   - `git fetch && git reset --hard origin/main`
+   - `docker compose up -d --build --remove-orphans`
+   - Health check `curl http://localhost:3000/` (retry 10x)
+   - `docker image prune -f` untuk bersihkan image lama
+
+Kalau health check gagal, workflow akan print log container dan exit dengan error (deploy dianggap gagal).
+
+### Prasyarat Server
+
+Sebelum workflow pertama kali dijalankan, server tujuan harus sudah:
+
+1. **Punya Docker + Docker Compose plugin** terinstall (`docker compose version` jalan)
+2. **Repo sudah di-clone** di lokasi tertentu, misal `/opt/wavvy`:
+   ```bash
+   sudo mkdir -p /opt/wavvy && sudo chown $USER:$USER /opt/wavvy
+   git clone <repo-url> /opt/wavvy
+   cd /opt/wavvy
+   cp .env.example .env
+   nano .env   # isi nilai produksi
+   docker compose up -d   # test manual dulu
+   ```
+3. **User SSH punya akses ke Docker** (tambahkan ke group `docker`):
+   ```bash
+   sudo usermod -aG docker $USER
+   # logout-login ulang agar efek
+   ```
+4. **SSH key** di-authorize: tambahkan public key yang akan dipakai GitHub Actions ke `~/.ssh/authorized_keys`
+
+### GitHub Secrets yang Harus Di-set
+
+Di repository → **Settings → Secrets and variables → Actions** → tambahkan:
+
+| Secret | Wajib | Contoh | Keterangan |
+|---|---|---|---|
+| `SSH_HOST` | Ya | `192.168.1.10` atau `wavvy.example.com` | Alamat server |
+| `SSH_USER` | Ya | `deploy` atau `ubuntu` | User SSH (harus bisa `docker compose`) |
+| `SSH_KEY` | Ya | `-----BEGIN OPENSSH PRIVATE KEY-----...` | Private key (lengkap, multi-line) |
+| `SSH_PORT` | Tidak | `22` | Port SSH (default 22 kalau kosong) |
+| `APP_PATH` | Ya | `/opt/wavvy` | Direktori repo di server |
+
+> **Tentang `SSH_KEY`**: generate key khusus untuk CI, **jangan** pakai key personal:
+> ```bash
+> ssh-keygen -t ed25519 -C "wavvy-deploy" -f ~/.ssh/wavvy_deploy -N ""
+> cat ~/.ssh/wavvy_deploy.pub   # tambahkan ke authorized_keys di server
+> cat ~/.ssh/wavvy_deploy       # copy full content → paste ke GitHub secret SSH_KEY
+> ```
+
+### Environment Protection (Opsional tapi Direkomendasikan)
+
+Di **Settings → Environments → New environment** → beri nama `production`:
+
+- Aktifkan **Required reviewers** → deploy butuh approval manual
+- Aktifkan **Deployment branches** → batasi hanya branch `main`
+
+Ini mencegah deploy tidak sengaja dari branch lain atau fork.
+
+### Catatan Penting
+
+- **File `.env` di server TIDAK di-overwrite** oleh deploy (karena `.env` di-gitignore). Perubahan env harus dilakukan manual di server.
+- **Database schema**: file `database.sql` hanya di-apply saat first run (volume MySQL kosong). Untuk migrasi berikutnya, gunakan file SQL di folder `migrations/` dan jalankan manual.
+- **Sessions WhatsApp akan tetap hidup** saat deploy karena folder `sessions/` di-mount sebagai volume (tidak ikut terbangun ulang image). Tapi ada jeda beberapa detik saat container restart — user akan mengalami reconnect otomatis.
+- **Rollback**: kalau deploy baru bermasalah, SSH ke server dan `git reset --hard <commit-lama>` lalu `docker compose up -d --build`.
+
+### Trigger Manual
+
+Bisa trigger deploy tanpa push via tab **Actions → Deploy to Server → Run workflow** (karena workflow aktifkan `workflow_dispatch`).
+
+---
+
 ## Troubleshooting
 
 **Session selalu logout / QR terus muncul**
@@ -508,6 +592,17 @@ Aktifkan HTTPS (Let's Encrypt) sebelum production.
 - Cek proses cron scheduler (`node-cron`) di log
 - `MSG_BETWEEN_DELAY` terlalu tinggi → campaign lambat
 - Plan user mungkin kena message limit
+
+**GitHub Actions deploy gagal di step SSH**
+- Cek secret `SSH_KEY` sudah lengkap termasuk header/footer `-----BEGIN ... END-----`
+- Pastikan public key sudah masuk `~/.ssh/authorized_keys` di server
+- Test manual: `ssh -i ~/.ssh/wavvy_deploy user@host` dari local
+- Kalau SSH berhasil tapi `docker compose` error → user SSH belum masuk group `docker`
+
+**Deploy sukses tapi health check gagal**
+- App container mungkin crash saat startup → SSH dan cek `docker compose logs app`
+- `.env` di server belum lengkap (ENCRYPTION_KEY, DB creds, dsb)
+- Port 3000 di-bind oleh service lain
 
 ---
 

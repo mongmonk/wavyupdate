@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Lint & Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Syntax check (server.js)
+        run: node --check server.js
+
+      - name: Syntax check (all JS files)
+        run: |
+          find controllers models services routes middleware config utils \
+            -name "*.js" -not -path "*/node_modules/*" \
+            -exec node --check {} \;
+
+      - name: Build Docker image
+        run: docker build -t wavvy:ci-test .

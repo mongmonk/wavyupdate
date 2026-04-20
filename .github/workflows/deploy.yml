@@ -1,0 +1,93 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Lint & Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Syntax check
+        run: |
+          node --check server.js
+          find controllers models services routes middleware config utils \
+            -name "*.js" -not -path "*/node_modules/*" \
+            -exec node --check {} \;
+
+      - name: Build Docker image
+        run: docker build -t wavvy:ci-test .
+
+  deploy:
+    name: Deploy via SSH
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+            cd ${{ secrets.APP_PATH }}
+
+            echo "==> Backing up sessions (just in case)"
+            mkdir -p backups
+            tar -czf backups/sessions-$(date +%Y%m%d-%H%M%S).tar.gz sessions/ 2>/dev/null || true
+            ls -t backups/sessions-*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm --
+
+            echo "==> Pulling latest code"
+            git fetch --all
+            git reset --hard origin/main
+
+            echo "==> Rebuilding and restarting containers"
+            docker compose pull db || true
+            docker compose up -d --build --remove-orphans
+
+            echo "==> Waiting for app to be healthy"
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              if curl -fsS -o /dev/null http://localhost:3000/; then
+                echo "App is up"
+                break
+              fi
+              echo "Waiting... ($i/10)"
+              sleep 3
+              if [ "$i" = "10" ]; then
+                echo "App failed health check"
+                docker compose logs --tail=100 app
+                exit 1
+              fi
+            done
+
+            echo "==> Pruning old images"
+            docker image prune -f
+
+            echo "==> Deploy complete"
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "Deployment failed. Check logs above and SSH to server for docker compose logs."
