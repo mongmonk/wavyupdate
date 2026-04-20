@@ -23,6 +23,7 @@ Platform web untuk mengelola banyak akun WhatsApp sekaligus dengan fitur automat
 - [CI/CD dengan GitHub Actions](#cicd-dengan-github-actions)
 - [Troubleshooting](#troubleshooting)
 
+
 ---
 
 ## Deskripsi Singkat
